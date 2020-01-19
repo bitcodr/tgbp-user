@@ -18,7 +18,6 @@ import (
 )
 
 //TODO save user hashed id in db
-//TODO in channel registration from super admin add channel type from company type in channelModel
 
 //RegisterChannel
 func (service *BotService) RegisterChannel(app *config.App, bot *tb.Bot, m *tb.Message, request *Event) bool {
@@ -568,7 +567,7 @@ func (service *BotService) GetUserCurrentActiveChannel(db *sql.DB, app *config.A
 	userModel := new(models.User)
 	channelModel := new(models.Channel)
 	companyModel := new(models.Company)
-	if err := db.QueryRow("SELECT ch.id,ch.channelID,ch.channelName,ch.channelURL,ch.channelType,us.id,us.userID,ch.channelModel,cc.companyID from `channels` as ch inner join `users_current_active_channel` as uc on ch.id=uc.channelID and uc.status='ACTIVE' inner join `users` as us on uc.userID=us.id and us.userID=? and us.`status`='ACTIVE' inner join companies_channels as cc on cc.channelID=ch.id", userID).Scan(&channelModel.ID, &channelModel.ChannelID, &channelModel.ChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &userModel.ID, &userModel.UserID, &channelModel.ChannelModel, &companyModel.ID); err != nil {
+	if err := db.QueryRow("SELECT ch.id,ch.channelID,ch.channelName,ch.channelURL,ch.channelType,us.id,us.userID,cc.companyID from `channels` as ch inner join `users_current_active_channel` as uc on ch.id=uc.channelID and uc.status='ACTIVE' inner join `users` as us on uc.userID=us.id and us.userID=? and us.`status`='ACTIVE' inner join companies_channels as cc on cc.channelID=ch.id", userID).Scan(&channelModel.ID, &channelModel.ChannelID, &channelModel.ChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &userModel.ID, &userModel.UserID, &companyModel.ID); err != nil {
 		log.Println(err)
 		return channelModel
 	}

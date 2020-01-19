@@ -79,8 +79,8 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			goto SendAndSaveDirectMessage
 		case lastState.State == config.LangConfig.GetString("STATE.ANSWER_TO_DM") || strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.ANSWER_TO_DM")+"_"):
 			goto SendAnswerAndSaveDirectMessage
-		case lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL") || incomingMessage == joinCompanyChannels.Text:
-			goto RegisterUserWithemail
+		// case lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL") || incomingMessage == joinCompanyChannels.Text:
+		// 	goto RegisterUserWithemail
 		case lastState.State == config.LangConfig.GetString("STATE.CONFIRM_REGISTER_COMPANY"):
 			goto ConfirmRegisterCompanyRequest
 		case lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_FOR_COMPANY"):
@@ -134,15 +134,15 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		}
 		goto END
 
-	RegisterUserWithemail:
-		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
-			UserState:  config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"),
-			Command:    joinCompanyChannels.Text,
-			Controller: "RegisterUserWithemail",
-		}) {
-			Init(app, bot, true)
-		}
-		goto END
+	// RegisterUserWithemail:
+	// 	if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
+	// 		UserState:  config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"),
+	// 		Command:    joinCompanyChannels.Text,
+	// 		Controller: "RegisterUserWithemail",
+	// 	}) {
+	// 		Init(app, bot, true)
+	// 	}
+	// 	goto END
 
 	ConfirmRegisterCompanyRequest:
 		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{

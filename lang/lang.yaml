@@ -6,7 +6,6 @@ GENERAL:
   CHANNEL_EMAIL_SUFFIXES: channels_email_suffixes
   COMPANY_NAME: companyName
   CHANNEL_TYPE: channelType
-  CHANNEL_MODEL: channelModel
   MANUAL_CHANNEL_NAME: manualChannelName
   UNIQUE_ID: uniqueID
   CHANNEL_URL: channelURL

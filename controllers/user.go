@@ -213,7 +213,7 @@ func GetUserLastState(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, u
 
 func (service *BotService) CheckUserRegisteredOrNot(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState, text string, userID int) bool {
 	channel := service.GetUserCurrentActiveChannel(db, app, bot, m, userID)
-	if channel.ChannelModel != "" {
+	if channel.ManualChannelName != "" {
 		userModel := new(models.User)
 		err := db.QueryRow("SELECT us.`id` from `users` as us inner join `users_channels` as uc on us.id=uc.userID and uc.channelID=? where us.userID=? and uc.status = 'ACTIVE' limit 1", channel.ID, userID).Scan(&userModel.ID)
 		if errors.Is(err, sql.ErrNoRows) {
