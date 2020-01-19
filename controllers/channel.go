@@ -11,9 +11,9 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/amiraliio/tgbp/config"
-	"github.com/amiraliio/tgbp/lang"
-	"github.com/amiraliio/tgbp/models"
+	"github.com/amiraliio/tgbp-user/config"
+	"github.com/amiraliio/tgbp-user/lang"
+	"github.com/amiraliio/tgbp-user/models"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 

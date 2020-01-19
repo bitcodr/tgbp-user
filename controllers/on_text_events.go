@@ -2,9 +2,9 @@ package controllers
 
 import (
 	"database/sql"
-	"github.com/amiraliio/tgbp/config"
-	"github.com/amiraliio/tgbp/helpers"
-	"github.com/amiraliio/tgbp/models"
+	"github.com/amiraliio/tgbp-user/config"
+	"github.com/amiraliio/tgbp-user/helpers"
+	"github.com/amiraliio/tgbp-user/models"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"strings"
 )

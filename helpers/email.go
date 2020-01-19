@@ -2,7 +2,7 @@ package helpers
 
 import (
 	"crypto/tls"
-	"github.com/amiraliio/tgbp/config"
+	"github.com/amiraliio/tgbp-user/config"
 	"gopkg.in/gomail.v2"
 	"log"
 )

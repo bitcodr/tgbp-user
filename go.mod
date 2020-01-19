@@ -1,4 +1,4 @@
-module github.com/amiraliio/tgbp
+module github.com/amiraliio/tgbp-user
 
 go 1.13
 

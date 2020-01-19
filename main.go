@@ -4,8 +4,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/amiraliio/tgbp/config"
-	"github.com/amiraliio/tgbp/controllers"
+	"github.com/amiraliio/tgbp-user/config"
+	"github.com/amiraliio/tgbp-user/controllers"
 )
 
 func main() {

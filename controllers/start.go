@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"github.com/amiraliio/tgbp/config"
+	"github.com/amiraliio/tgbp-user/config"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
 	"strings"
