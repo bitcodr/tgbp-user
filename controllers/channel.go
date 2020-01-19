@@ -266,11 +266,34 @@ func (service *BotService) SaveAndSendMessage(db *sql.DB, app *config.App, bot *
 		senderID := strconv.Itoa(m.Sender.ID)
 		botMessageID := strconv.Itoa(m.ID)
 		userDataModel := service.GetUserByTelegramID(db, app, m.Sender.ID)
+		newReply := tb.InlineButton{
+			Unique: config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") + "_" + activeChannel.ChannelID + "_" + senderID + "_" + botMessageID,
+			Text:   config.LangConfig.GetString("MESSAGES.REPLY"),
+			URL:    app.TgDomain + app.BotUsername + "?start=" + config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") + "_" + activeChannel.ChannelID + "_" + senderID + "_" + botMessageID,
+		}
+		newM := tb.InlineButton{
+			Unique: config.LangConfig.GetString("STATE.COMPOSE_MESSAGE") + "_" + activeChannel.ChannelID,
+			Text:   config.LangConfig.GetString("MESSAGES.NEW"),
+			URL:    app.TgDomain + app.BotUsername + "?start=" + config.LangConfig.GetString("STATE.COMPOSE_MESSAGE") + "_" + activeChannel.ChannelID,
+		}
+		newDM := tb.InlineButton{
+			Unique: config.LangConfig.GetString("STATE.REPLY_BY_DM") + "_" + activeChannel.ChannelID + "_" + senderID + "_" + botMessageID,
+			Text:   config.LangConfig.GetString("MESSAGES.DIRECT") + " [User " + userDataModel.CustomID + "]",
+			URL:    app.TgDomain + app.BotUsername + "?start=" + config.LangConfig.GetString("STATE.REPLY_BY_DM") + "_" + activeChannel.ChannelID + "_" + senderID + "_" + botMessageID,
+		}
+		inlineKeys := [][]tb.InlineButton{
+			[]tb.InlineButton{newReply},
+			[]tb.InlineButton{newDM},
+			[]tb.InlineButton{newM},
+		}
 		activeChannelID, err := strconv.Atoi(activeChannel.ChannelID)
 		if err == nil {
 			user := new(tb.User)
 			user.ID = activeChannelID
 			options := new(tb.SendOptions)
+			replyModel := new(tb.ReplyMarkup)
+			replyModel.InlineKeyboard = inlineKeys
+			options.ReplyMarkup = replyModel
 			options.ParseMode = tb.ModeHTML
 			message, err := bot.Send(user, "[User "+userDataModel.CustomID+"] "+m.Text, options)
 			if err == nil {
@@ -330,13 +353,36 @@ func (service *BotService) SendAndSaveReplyMessage(db *sql.DB, app *config.App, 
 					channelIntValue, err := strconv.Atoi(channelID)
 					if err == nil {
 						userDataModel := service.GetUserByTelegramID(db, app, m.Sender.ID)
+						newReply := tb.InlineButton{
+							Unique: config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") + "_" + channelID + "_" + senderID + "_" + newBotMessageID,
+							Text:   config.LangConfig.GetString("MESSAGES.REPLY"),
+							URL:    app.TgDomain + app.BotUsername + "?start=" + config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") + "_" + channelID + "_" + senderID + "_" + newBotMessageID,
+						}
+						newM := tb.InlineButton{
+							Unique: config.LangConfig.GetString("STATE.COMPOSE_MESSAGE") + "_" + channelID,
+							Text:   config.LangConfig.GetString("MESSAGES.NEW"),
+							URL:    app.TgDomain + app.BotUsername + "?start=" + config.LangConfig.GetString("STATE.COMPOSE_MESSAGE") + "_" + channelID,
+						}
+						newDM := tb.InlineButton{
+							Unique: config.LangConfig.GetString("STATE.REPLY_BY_DM") + "_" + channelID + "_" + senderID + "_" + newBotMessageID,
+							Text:   config.LangConfig.GetString("MESSAGES.DIRECT") + " [User " + userDataModel.CustomID + "]",
+							URL:    app.TgDomain + app.BotUsername + "?start=" + config.LangConfig.GetString("STATE.REPLY_BY_DM") + "_" + channelID + "_" + senderID + "_" + newBotMessageID,
+						}
+						inlineKeys := [][]tb.InlineButton{
+							[]tb.InlineButton{newReply},
+							[]tb.InlineButton{newDM},
+							[]tb.InlineButton{newM},
+						}
 						ChannelMessageDataID, err := strconv.Atoi(messageModel.ChannelMessageID)
 						if err == nil {
 							activeChannel := service.GetUserCurrentActiveChannel(db, app, bot, m, m.Sender.ID)
 							sendMessageModel := new(tb.Message)
 							sendMessageModel.ID = ChannelMessageDataID
+							newReplyModel := new(tb.ReplyMarkup)
+							newReplyModel.InlineKeyboard = inlineKeys
 							newSendOption := new(tb.SendOptions)
 							newSendOption.ReplyTo = sendMessageModel
+							newSendOption.ReplyMarkup = newReplyModel
 							newSendOption.ParseMode = tb.ModeHTML
 							user := new(tb.User)
 							user.ID = channelIntValue
