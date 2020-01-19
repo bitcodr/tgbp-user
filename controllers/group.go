@@ -160,17 +160,7 @@ func (service *BotService) NewMessageGroupHandler(app *config.App, bot *tb.Bot, 
 			log.Println(err)
 			return true
 		}
-		options := new(tb.SendOptions)
-		markup := new(tb.ReplyMarkup)
-		homeBTN := tb.ReplyButton{
-			Text: config.LangConfig.GetString("GENERAL.HOME"),
-		}
-		replyKeys := [][]tb.ReplyButton{
-			[]tb.ReplyButton{homeBTN},
-		}
-		markup.ReplyKeyboard = replyKeys
-		options.ReplyMarkup = markup
-		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_DRAFT_YOUR_MESSAGE")+channelModel.ChannelType+" "+channelModel.ChannelName, options)
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_DRAFT_YOUR_MESSAGE")+channelModel.ChannelType+" "+channelModel.ChannelName)
 		return true
 	}
 	return false
@@ -193,17 +183,7 @@ func (service *BotService) NewMessageGroupHandlerCallback(app *config.App, bot *
 			log.Println(err)
 			return true
 		}
-		options := new(tb.SendOptions)
-		markup := new(tb.ReplyMarkup)
-		homeBTN := tb.ReplyButton{
-			Text: config.LangConfig.GetString("GENERAL.HOME"),
-		}
-		replyKeys := [][]tb.ReplyButton{
-			[]tb.ReplyButton{homeBTN},
-		}
-		markup.ReplyKeyboard = replyKeys
-		options.ReplyMarkup = markup
-		bot.Send(c.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_DRAFT_YOUR_MESSAGE")+channelModel.ChannelType+" "+channelModel.ChannelName, options)
+		bot.Send(c.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_DRAFT_YOUR_MESSAGE")+channelModel.ChannelType+" "+channelModel.ChannelName)
 		return true
 	}
 	return false

@@ -38,14 +38,4 @@ func onActionEvents(app *config.App, bot *tb.Bot) {
 		}
 	})
 
-	bot.Handle(&addAnonMessage, func(message *tb.Message) {
-		if generalEventsHandler(app, bot, message, &Event{
-			Event:      &addAnonMessage,
-			UserState:  config.LangConfig.GetString("STATE.ADD_ANON_MESSAGE"),
-			Controller: "AddAnonMessageToChannel",
-		}) {
-			Init(app, bot, true)
-		}
-	})
-
 }

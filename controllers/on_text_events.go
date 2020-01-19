@@ -23,8 +23,6 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		//check incoming text
 		incomingMessage := message.Text
 		switch {
-		case incomingMessage == config.LangConfig.GetString("GENERAL.HOME") || incomingMessage == config.LangConfig.GetString("COMMANDS.START"):
-			goto StartBot
 		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE")+"_"):
 			goto SendReply
 		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.REPLY_BY_DM")+"_"):
@@ -34,17 +32,6 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		default:
 			goto CheckState
 		}
-
-	StartBot:
-		if generalEventsHandler(app, bot, message, &Event{
-			UserState:  config.LangConfig.GetString("STATE.HOME"),
-			Command:    config.LangConfig.GetString("GENERAL.HOME"),
-			Command1:   config.LangConfig.GetString("COMMANDS.START"),
-			Controller: "StartBot",
-		}) {
-			Init(app, bot, true)
-		}
-		goto END
 
 	SendReply:
 		if generalEventsHandler(app, bot, message, &Event{
@@ -84,8 +71,6 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		///////////////////////////////////////////
 	CheckState:
 		switch {
-		case lastState.State == config.LangConfig.GetString("STATE.SETUP_VERIFIED_COMPANY") || incomingMessage == setupVerifiedCompany.Text:
-			goto SetUpCompanyByAdmin
 		case lastState.State == config.LangConfig.GetString("STATE.NEW_MESSAGE_TO_GROUP") || strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.COMPOSE_MESSAGE")+"_"):
 			goto SaveAndSendMessage
 		case lastState.State == config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") || strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE")+"_"):
@@ -106,16 +91,6 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			bot.Send(message.Sender, "Your message "+message.Text+" is not being processed or sent to any individual, channel or group. Please use inline buttons or use the /home command.")
 			goto END
 		}
-
-	SetUpCompanyByAdmin:
-		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
-			UserState:  config.LangConfig.GetString("STATE.SETUP_VERIFIED_COMPANY"),
-			Command:    setupVerifiedCompany.Text,
-			Controller: "SetUpCompanyByAdmin",
-		}) {
-			Init(app, bot, true)
-		}
-		goto END
 
 	SaveAndSendMessage:
 		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
@@ -203,7 +178,7 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 func inlineOnTextEventsHandler(app *config.App, bot *tb.Bot, message *tb.Message, db *sql.DB, lastState *models.UserLastState, request *Event) bool {
 	var result bool
 	switch {
-	case request.Controller == "RegisterUserWithemail" || request.Controller == "SetUpCompanyByAdmin":
+	case request.Controller == "RegisterUserWithemail":
 		helpers.Invoke(new(BotService), &result, request.Controller, db, app, bot, message, request, lastState, strings.TrimSpace(message.Text), message.Sender.ID)
 	default:
 		helpers.Invoke(new(BotService), &result, request.Controller, db, app, bot, message, request, lastState)

@@ -33,7 +33,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 		return true
 	}
 	SaveUserLastState(db, app, bot, text, userID, config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"))
-	bot.Send(userModel, config.LangConfig.GetString("MESSAGES.ENTER_COMPANY_EMAIL"), HomeKeyOption(db, app))
+	bot.Send(userModel, config.LangConfig.GetString("MESSAGES.ENTER_COMPANY_EMAIL"))
 	return true
 }
 
@@ -47,12 +47,8 @@ func (service *BotService) checkTheCompanyEmailSuffixExist(app *config.App, bot 
 	noBTN := tb.ReplyButton{
 		Text: config.LangConfig.GetString("GENERAL.NO_TEXT"),
 	}
-	homeBTN := tb.ReplyButton{
-		Text: config.LangConfig.GetString("GENERAL.HOME"),
-	}
 	replyKeys := [][]tb.ReplyButton{
 		[]tb.ReplyButton{yesBTN, noBTN},
-		[]tb.ReplyButton{homeBTN},
 	}
 	replyModel := new(tb.ReplyMarkup)
 	replyModel.ReplyKeyboard = replyKeys
@@ -78,26 +74,12 @@ func (service *BotService) ConfirmRegisterCompanyRequest(db *sql.DB, app *config
 		}
 		defer insertCompanyRequest.Close()
 		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.JOIN_REQUEST_ADDED"))
-		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.SEND_REQUEST_TO_ADMIN"), HomeKeyOption(db, app))
+		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.SEND_REQUEST_TO_ADMIN"))
 	case config.LangConfig.GetString("GENERAL.NO_TEXT"):
 		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.JOIN_REQUEST_DISMISSED"))
-		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.CONTINUE_IN_BOT"), HomeKeyOption(db, app))
+		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.CONTINUE_IN_BOT"))
 	}
 	return true
-}
-
-func HomeKeyOption(db *sql.DB, app *config.App) *tb.SendOptions {
-	options := new(tb.SendOptions)
-	homeBTN := tb.ReplyButton{
-		Text: config.LangConfig.GetString("GENERAL.HOME"),
-	}
-	replyKeys := [][]tb.ReplyButton{
-		[]tb.ReplyButton{homeBTN},
-	}
-	replyModel := new(tb.ReplyMarkup)
-	replyModel.ReplyKeyboard = replyKeys
-	options.ReplyMarkup = replyModel
-	return options
 }
 
 func (service *BotService) ConfirmRegisterUserForTheCompany(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState) bool {
@@ -135,10 +117,10 @@ func (service *BotService) ConfirmRegisterUserForTheCompany(db *sql.DB, app *con
 		defer insertCompanyRequest.Close()
 		go helpers.SendEmail(strconv.Itoa(randomeNumber), channelData[1])
 		SaveUserLastState(db, app, bot, lastState.Data, m.Sender.ID, config.LangConfig.GetString("STATE.EMAIL_FOR_USER_REGISTRATION"))
-		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.ENTER_CODE_FROM_EMAIL"), HomeKeyOption(db, app))
+		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.ENTER_CODE_FROM_EMAIL"))
 	case config.LangConfig.GetString("GENERAL.NO_TEXT"):
 		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.CANCEL_USER_REGISTRATION"))
-		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.CONTINUE_TO_HOME_BTN"), HomeKeyOption(db, app))
+		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.CONTINUE_TO_HOME_BTN"))
 	}
 	return true
 }
@@ -153,7 +135,7 @@ func (service *BotService) RegisterUserWithEmailAndCode(db *sql.DB, app *config.
 	}
 	//TODO check token expire time
 	if !helpers.CheckPasswordHash(m.Text, userActiveKeyModel.ActiveKey) {
-		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.KEY_IS_INVALID"), HomeKeyOption(db, app))
+		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.KEY_IS_INVALID"))
 		return true
 	}
 	if !strings.Contains(lastState.Data, "_") {
