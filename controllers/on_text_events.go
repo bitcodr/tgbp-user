@@ -88,7 +88,7 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		case lastState.State == config.LangConfig.GetString("STATE.EMAIL_FOR_USER_REGISTRATION"):
 			goto RegisterUserWithEmailAndCode
 		default:
-			bot.Send(message.Sender, "Your message "+message.Text+" is not being processed or sent to any individual, channel or group. Please use inline buttons or use the /home command.")
+			bot.Send(message.Sender, "Your message "+message.Text+" is not being processed or sent to any individual, channel or group.")
 			goto END
 		}
 

@@ -120,7 +120,6 @@ func (service *BotService) ConfirmRegisterUserForTheCompany(db *sql.DB, app *con
 		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.ENTER_CODE_FROM_EMAIL"))
 	case config.LangConfig.GetString("GENERAL.NO_TEXT"):
 		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.CANCEL_USER_REGISTRATION"))
-		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.CONTINUE_TO_HOME_BTN"))
 	}
 	return true
 }

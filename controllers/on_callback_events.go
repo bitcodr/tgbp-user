@@ -55,7 +55,7 @@ func onCallbackEvents(app *config.App, bot *tb.Bot) {
 		case config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"):
 			goto RegisterUserWithemail
 		default:
-			bot.Send(c.Sender, "Your message "+c.Data+" is not being processed or sent to any individual, channel or group. Please use inline buttons or use the /home command.")
+			bot.Send(c.Sender, "Your message "+c.Data+" is not being processed or sent to any individual, channel or group.")
 			goto END
 		}
 
