@@ -41,6 +41,7 @@ STATE:
   JOIN_REQUEST_DISMISSED: join_request_dismissed
   CANCEL_USER_REGISTRATION: cancel_user_registration_for_the_company
   USER_NOT_REGISTERED: user_not_registered
+  JOIN_TO_GROUP_CHANNEL: "join_to_"
 
 MESSAGES:
   DATA_MUST_NOT_BE_NULL: "final data must not be null"
@@ -91,7 +92,6 @@ MESSAGES:
   BACK_TO: "⬅️Back to "
   YOU_DO_NOT_HAVE_PREMISSION_TO_SEND_A_MESSAGE: "You should first confirm your company email for sending a message"
   DM_HISTORY: "DM history: You & "
-  JOIN_TO_GROUP_CHANNEL: "join_to_"
 
 COMMANDS:
   ENABLE_CHAT: "/enable_anonymity_support"
