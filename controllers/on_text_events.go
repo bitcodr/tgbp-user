@@ -29,7 +29,7 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			goto SanedDM
 		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.COMPOSE_MESSAGE")+"_"):
 			goto NewMessageGroupHandler
-		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.JOIN_TO_GROUP_CHANNEL")+"_"):
+		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.JOIN_TO_GROUP_CHANNEL")):
 			goto JoinUserToChannel
 		default:
 			goto CheckState
