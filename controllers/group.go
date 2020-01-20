@@ -319,8 +319,8 @@ func (service *BotService) CheckIfBotIsAdmin(app *config.App, bot *tb.Bot, m *tb
 		for _, admin := range admins {
 			if admin.User.ID == bot.Me.ID {
 				channelModel := new(models.Channel)
-				row := db.QueryRow("select id from `channels` where `channelID`=? and (`channelURL` is NULL OR `channelURL` = '')", id)
-				if err := row.Scan(channelModel.ID); err == nil {
+				err = db.QueryRow("select `id` from `channels` where `channelID`=? and (`channelURL` is NULL OR `channelURL` = '')", id).Scan(&channelModel.ID)
+				if err == nil {
 					inviteLink, err := bot.GetInviteLink(chatModel)
 					if err != nil {
 						log.Println(err)
