@@ -29,6 +29,8 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			goto SanedDM
 		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.COMPOSE_MESSAGE")+"_"):
 			goto NewMessageGroupHandler
+		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.JOIN_TO_GROUP_CHANNEL")+"_"):
+			goto JoinUserToChannel
 		default:
 			goto CheckState
 		}
@@ -66,6 +68,15 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		}
 		goto END
 
+	JoinUserToChannel:
+		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
+			UserState:  config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"),
+			Controller: "RegisterUserWithemail",
+		}) {
+			Init(app, bot, true)
+		}
+		goto END
+
 		/////////////////////////////////////////////
 		////////check the user state////////////////
 		///////////////////////////////////////////
@@ -81,6 +92,8 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			goto SendAnswerAndSaveDirectMessage
 		case lastState.State == config.LangConfig.GetString("STATE.CONFIRM_REGISTER_COMPANY"):
 			goto ConfirmRegisterCompanyRequest
+		case lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"):
+			goto RegisterUserWithemail
 		case lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_FOR_COMPANY"):
 			goto ConfirmRegisterUserForTheCompany
 		case lastState.State == config.LangConfig.GetString("STATE.EMAIL_FOR_USER_REGISTRATION"):
@@ -106,6 +119,15 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			Command:    config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") + "_",
 			Command1:   config.LangConfig.GetString("COMMANDS.START_REPLY"),
 			Controller: "SendAndSaveReplyMessage",
+		}) {
+			Init(app, bot, true)
+		}
+		goto END
+
+	RegisterUserWithemail:
+		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
+			UserState:  config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"),
+			Controller: "RegisterUserWithemail",
 		}) {
 			Init(app, bot, true)
 		}
