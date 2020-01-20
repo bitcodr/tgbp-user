@@ -1,20 +1,14 @@
 package controllers
 
 import (
-	"database/sql"
 	"github.com/amiraliio/tgbp-user/config"
 	"github.com/amiraliio/tgbp-user/helpers"
-	"github.com/amiraliio/tgbp-user/models"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"strings"
 )
 
 func onCallbackEvents(app *config.App, bot *tb.Bot) {
 	bot.Handle(tb.OnCallback, func(c *tb.Callback) {
-
-		db := app.DB()
-		defer db.Close()
-		lastState := GetUserLastState(db, app, bot, c.Message, c.Sender.ID)
 
 		//check incoming text
 		incomingMessage := c.Data
@@ -24,7 +18,8 @@ func onCallbackEvents(app *config.App, bot *tb.Bot) {
 		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.COMPOSE_MESSAGE")+"_"):
 			goto NewMessageGroupHandlerCallback
 		default:
-			goto CheckState
+			bot.Send(c.Sender, "Your message "+c.Data+" is not being processed or sent to any individual, channel or group.")
+			goto END
 		}
 
 	SanedAnswerDM:
@@ -47,27 +42,6 @@ func onCallbackEvents(app *config.App, bot *tb.Bot) {
 		}
 		goto END
 
-		/////////////////////////////////////////////
-		////////check the user state////////////////
-		///////////////////////////////////////////
-	CheckState:
-		switch lastState.State {
-		case config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"):
-			goto RegisterUserWithemail
-		default:
-			bot.Send(c.Sender, "Your message "+c.Data+" is not being processed or sent to any individual, channel or group.")
-			goto END
-		}
-
-	RegisterUserWithemail:
-		if inlineOnCallbackEventsHandler(app, bot, c, db, lastState, &Event{
-			UserState:  config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"),
-			Controller: "RegisterUserWithemail",
-		}) {
-			Init(app, bot, true)
-		}
-		goto END
-
 	END:
 	})
 }
@@ -75,16 +49,5 @@ func onCallbackEvents(app *config.App, bot *tb.Bot) {
 func onCallbackEventsHandler(app *config.App, bot *tb.Bot, c *tb.Callback, request *Event) bool {
 	var result bool
 	helpers.Invoke(new(BotService), &result, request.Controller, app, bot, c, request)
-	return result
-}
-
-func inlineOnCallbackEventsHandler(app *config.App, bot *tb.Bot, c *tb.Callback, db *sql.DB, lastState *models.UserLastState, request *Event) bool {
-	var result bool
-	switch {
-	case request.Controller == "RegisterUserWithemail":
-		helpers.Invoke(new(BotService), &result, request.Controller, db, app, bot, c.Message, request, lastState, strings.TrimSpace(c.Data), c.Sender.ID)
-	default:
-		helpers.Invoke(new(BotService), &result, request.Controller, app, bot, c, request)
-	}
 	return result
 }
