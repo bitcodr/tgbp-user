@@ -76,12 +76,10 @@ MESSAGES:
   CONFIRM_REGISTER_TO_CHANNEL: "Do you confirm that you want to register to the "
   BLONGS_TO_COMPANY: " blongs to the company "
   SEND_REQUEST_TO_ADMIN: "Your Request Sent To The Admin And Will be Active After Confirmation."
-  CONTINUE_IN_BOT: "You Can Continue in Bot by Pressing The Home Button"
   STRING_MUST_BE_2_PART: "string must be two part, channelID and userEmail"
   LENGTH_OF_CHANNEL_DATA_MUST_BE_2: "length of channel data must be 2"
   REGISTERED_IN_CHANNEL: "You've been registered in the "
   ENTER_CODE_FROM_EMAIL: "Please Enter The Code That Sent To Your Email Address"
-  CONTINUE_TO_HOME_BTN: "You Can Continue in Bot by Pressing The Home Button"
   KEY_IS_INVALID: "The key Is Invalid"
   CLICK_HERE_TO_START_COMMUNICATION: "Click Here To Start Communication"
   YOU_ARE_MEMBER_OF_CHANNEL: "You are now member of "
@@ -92,6 +90,7 @@ MESSAGES:
   BACK_TO: "⬅️Back to "
   YOU_DO_NOT_HAVE_PREMISSION_TO_SEND_A_MESSAGE: "You should first confirm your company email for sending a message"
   DM_HISTORY: "DM history: You & "
+  THERE_IS_NO_COMPANY_TO_JOIN : "Your requested channel to join doesn't exist"
 
 COMMANDS:
   ENABLE_CHAT: "/enable_anonymity_support"
@@ -99,3 +98,4 @@ COMMANDS:
   START_REPLY: "/start reply_to_message_on_group_"
   START_REPLY_DM: "/start reply_by_dm_to_user_on_group_"
   START_COMPOSE_IN_GROUP: "/start compose_message_in_group_"
+  JOIN_TO_GROUP: "/start join_to_"
