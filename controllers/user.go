@@ -64,7 +64,7 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 		return nil, nil, true
 	}
 	userDataModel := new(models.User)
-	if err := db.QueryRow("SELECT id from `users` as us inner join users_channels as uc on us.id=uc.userID and uc.channelID=? and uc.status='ACTIVE' where us.userID=?", channelModel.ID, userID).Scan(&userDataModel.ID); err == nil {
+	if err := db.QueryRow("SELECT us.id from `users` as us inner join users_channels as uc on us.id=uc.userID and uc.channelID=? and uc.status='ACTIVE' where us.userID=?", channelModel.ID, userID).Scan(&userDataModel.ID); err == nil {
 		bot.Send(userModel, "You have been registered in the "+channelModel.ChannelType+" "+channelModel.ChannelName+" belongs to the company "+companyModel.CompanyName+", to start commination, go to "+channelModel.ChannelType+" via "+channelModel.ChannelURL, options)
 		return nil, nil, true
 	}
