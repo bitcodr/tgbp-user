@@ -63,9 +63,25 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_COMPANY_TO_JOIN"), options)
 		return nil, nil, true
 	}
+	newOptions := new(tb.SendOptions)
+	newReplyModel := new(tb.ReplyMarkup)
+	gotoChannel := tb.InlineButton{
+		Text: "Click Here to Start Commination",
+		URL:  channelModel.ChannelURL,
+	}
+	replyKeys := [][]tb.InlineButton{
+		[]tb.InlineButton{gotoChannel},
+	}
+	newReplyModel.InlineKeyboard = replyKeys
+	newReplyModel.ReplyKeyboardRemove = true
+	newOptions.ReplyMarkup = newReplyModel
 	userDataModel := new(models.User)
 	if err := db.QueryRow("SELECT us.id from `users` as us inner join users_channels as uc on us.id=uc.userID and uc.channelID=? and uc.status='ACTIVE' where us.userID=?", channelModel.ID, userID).Scan(&userDataModel.ID); err == nil {
-		bot.Send(userModel, "You have been registered in the "+channelModel.ChannelType+" "+channelModel.ChannelName+" belongs to the company "+companyModel.CompanyName+", to start commination, go to "+channelModel.ChannelType+" via "+channelModel.ChannelURL, options)
+		bot.Send(userModel, "You have been registered in the "+channelModel.ChannelType+" "+channelModel.ChannelName+" belongs to the company "+companyModel.CompanyName+", to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
+		return nil, nil, true
+	}
+	if err := db.QueryRow("SELECT us.id from users as us inner join users_channels as uc on us.id=uc.userID and uc.status='ACTIVE' inner join companies_channels as cc on cc.channelID=uc.channelID and cc.companyID=? where us.userID=?", companyModel.ID, userID).Scan(&userDataModel.ID); err == nil {
+		bot.Send(userModel, "You have been registered in the one of channels or groups blongs to company "+companyModel.CompanyName+", and the verification is not required, to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
 		return nil, nil, true
 	}
 	return companyModel, channelModel, false
