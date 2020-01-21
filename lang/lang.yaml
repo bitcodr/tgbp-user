@@ -72,7 +72,7 @@ MESSAGES:
   PLEASE_ENTER_VALID_EMAIL: "Please Enter a Valid Email Address"
   NOT_ALLOWED_PUBLIC_EMAIL: "You Can't Enter a Free Email Service, Please Enter Your Email in Your Company:"
   ENTER_COMPANY_EMAIL: "Please Enter Your Email in Your Company:"
-  COMPANY_WITH_THE_EMAIL_NOT_EXIST: "The company according to your email doesn't exist, do you confirm sending a registration request for your company?"
+  COMPANY_WITH_THE_EMAIL_NOT_EXIST: "The company according to your email doesn't exist"
   CONFIRM_REGISTER_TO_CHANNEL: "Do you confirm that you want to register to the "
   BLONGS_TO_COMPANY: " blongs to the company "
   SEND_REQUEST_TO_ADMIN: "Your Request Sent To The Admin And Will be Active After Confirmation."
