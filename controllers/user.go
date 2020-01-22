@@ -283,11 +283,11 @@ func (service *BotService) CheckUserRegisteredOrNot(db *sql.DB, app *config.App,
 			err := db.QueryRow("SELECT us.`id` from `users` as us inner join `users_channels` as uc on us.id=uc.userID inner join companies_channels as cc on cc.channelID=uc.channelID and cc.companyID=? where us.userID=? and uc.status = 'ACTIVE' limit 1", channel.Company.ID, userID).Scan(&userModel.ID)
 			if errors.Is(err, sql.ErrNoRows) {
 				switch {
-				case section == config.LangConfig.GetString("GENERAL.REPLY_VERIFY") && channel.Setting.ReplyVerify == true:
+				case section == config.LangConfig.GetString("GENERAL.REPLY_VERIFY") && channel.Setting.ReplyVerify:
 					goto VERIFY
-				case section == config.LangConfig.GetString("GENERAL.NEW_MESSAGE_VERIFY") && channel.Setting.NewMessageVerify == true:
+				case section == config.LangConfig.GetString("GENERAL.NEW_MESSAGE_VERIFY") && channel.Setting.NewMessageVerify:
 					goto VERIFY
-				case section == config.LangConfig.GetString("GENERAL.DIRECT_VERIFY") && channel.Setting.DirectVerify == true:
+				case section == config.LangConfig.GetString("GENERAL.DIRECT_VERIFY") && channel.Setting.DirectVerify:
 					goto VERIFY
 				default:
 					return false
