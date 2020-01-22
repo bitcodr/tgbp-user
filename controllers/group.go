@@ -152,7 +152,7 @@ func (service *BotService) NewMessageGroupHandler(app *config.App, bot *tb.Bot, 
 		channelID := strings.ReplaceAll(m.Text, request.Command1, "")
 		service.JoinFromGroup(db, app, bot, m, channelID)
 		lastState := GetUserLastState(db, app, bot, m, m.Sender.ID)
-		if service.CheckUserRegisteredOrNot(db, app, bot, m, request, lastState, m.Text, m.Sender.ID) {
+		if service.CheckUserRegisteredOrNot(db, app, bot, m, request, lastState, m.Text, m.Sender.ID, config.LangConfig.GetString("GENERAL.NEW_MESSAGE_VERIFY")) {
 			return true
 		}
 		channelModel := new(models.Channel)
@@ -171,7 +171,7 @@ func (service *BotService) NewMessageGroupHandlerCallback(app *config.App, bot *
 		db := app.DB()
 		defer db.Close()
 		lastState := GetUserLastState(db, app, bot, c.Message, c.Sender.ID)
-		if service.CheckUserRegisteredOrNot(db, app, bot, c.Message, request, lastState, c.Data, c.Sender.ID) {
+		if service.CheckUserRegisteredOrNot(db, app, bot, c.Message, request, lastState, c.Data, c.Sender.ID, config.LangConfig.GetString("GENERAL.NEW_MESSAGE_VERIFY")) {
 			return true
 		}
 		if c.Sender != nil {

@@ -274,9 +274,7 @@ func GetUserLastState(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, u
 	return userLastState
 }
 
-//TODO check unique email
-
-func (service *BotService) CheckUserRegisteredOrNot(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState, text string, userID int) bool {
+func (service *BotService) CheckUserRegisteredOrNot(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState, text string, userID int, section string) bool {
 	channel := service.GetUserCurrentActiveChannel(db, app, bot, m, userID)
 	if channel.ManualChannelName != "" {
 		userModel := new(models.User)
@@ -284,14 +282,28 @@ func (service *BotService) CheckUserRegisteredOrNot(db *sql.DB, app *config.App,
 		if errors.Is(err, sql.ErrNoRows) {
 			err := db.QueryRow("SELECT us.`id` from `users` as us inner join `users_channels` as uc on us.id=uc.userID inner join companies_channels as cc on cc.channelID=uc.channelID and cc.companyID=? where us.userID=? and uc.status = 'ACTIVE' limit 1", channel.Company.ID, userID).Scan(&userModel.ID)
 			if errors.Is(err, sql.ErrNoRows) {
-				if m.Sender != nil {
-					SaveUserLastState(db, app, bot, m.Text, m.Sender.ID, config.LangConfig.GetString("MESSAGES.USER_NOT_REGISTERED"))
+				switch {
+				case section == config.LangConfig.GetString("GENERAL.REPLY_VERIFY") && channel.Setting.ReplyVerify == true:
+					goto VERIFY
+				case section == config.LangConfig.GetString("GENERAL.NEW_MESSAGE_VERIFY") && channel.Setting.NewMessageVerify == true:
+					goto VERIFY
+				case section == config.LangConfig.GetString("GENERAL.DIRECT_VERIFY") && channel.Setting.DirectVerify == true:
+					goto VERIFY
+				default:
+					return false
 				}
-				bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.YOU_DO_NOT_HAVE_PREMISSION_TO_SEND_A_MESSAGE"))
+			VERIFY:
+				if m.Sender != nil {
+					SaveUserLastState(db, app, bot, channel.UniqueID, userID, config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"))
+				}
+				options := new(tb.SendOptions)
+				replyModel := new(tb.ReplyMarkup)
+				replyModel.ReplyKeyboardRemove = true
+				options.ReplyMarkup = replyModel
+				bot.Send(m.Sender, "You Should first verify your account, Please enter your email in the "+channel.ChannelType+" "+channel.ChannelName+" belongs to the company "+channel.Company.CompanyName+" for verification", options)
 				return true
 			}
 		}
 	}
 	return false
-	//TODO also check it according to event channel is required a action for instance reply is mandatory or not
 }

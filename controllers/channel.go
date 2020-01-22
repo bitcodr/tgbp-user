@@ -144,7 +144,7 @@ func (service *BotService) SendReply(app *config.App, bot *tb.Bot, m *tb.Message
 		defer db.Close()
 		service.CheckIfBotIsAdmin(app, bot, m, db, request)
 		lastState := GetUserLastState(db, app, bot, m, m.Sender.ID)
-		if service.CheckUserRegisteredOrNot(db, app, bot, m, request, lastState, m.Text, m.Sender.ID) {
+		if service.CheckUserRegisteredOrNot(db, app, bot, m, request, lastState, m.Text, m.Sender.ID, config.LangConfig.GetString("GENERAL.REPLY_VERIFY")) {
 			return true
 		}
 		if m.Sender != nil {
@@ -202,7 +202,7 @@ func (service *BotService) SanedDM(app *config.App, bot *tb.Bot, m *tb.Message, 
 		channelID := strings.TrimSpace(data[0])
 		service.JoinFromGroup(db, app, bot, m, channelID)
 		lastState := GetUserLastState(db, app, bot, m, m.Sender.ID)
-		if service.CheckUserRegisteredOrNot(db, app, bot, m, request, lastState, m.Text, m.Sender.ID) {
+		if service.CheckUserRegisteredOrNot(db, app, bot, m, request, lastState, m.Text, m.Sender.ID, config.LangConfig.GetString("GENERAL.DIRECT_VERIFY")) {
 			return true
 		}
 		options := new(tb.SendOptions)
@@ -224,7 +224,7 @@ func (service *BotService) SanedAnswerDM(app *config.App, bot *tb.Bot, m *tb.Cal
 		db := app.DB()
 		defer db.Close()
 		lastState := GetUserLastState(db, app, bot, m.Message, m.Sender.ID)
-		if service.CheckUserRegisteredOrNot(db, app, bot, m.Message, request, lastState, m.Data, m.Sender.ID) {
+		if service.CheckUserRegisteredOrNot(db, app, bot, m.Message, request, lastState, m.Data, m.Sender.ID, config.LangConfig.GetString("GENERAL.DIRECT_VERIFY")) {
 			return true
 		}
 		text := strings.TrimPrefix(m.Data, request.Command1)
@@ -613,12 +613,14 @@ func (service *BotService) GetUserCurrentActiveChannel(db *sql.DB, app *config.A
 	userModel := new(models.User)
 	channelModel := new(models.Channel)
 	companyModel := new(models.Company)
-	if err := db.QueryRow("SELECT ch.id,ch.channelID,ch.channelName,ch.channelURL,ch.channelType,us.id,us.userID,cc.companyID from `channels` as ch inner join `users_current_active_channel` as uc on ch.id=uc.channelID and uc.status='ACTIVE' inner join `users` as us on uc.userID=us.id and us.userID=? and us.`status`='ACTIVE' inner join companies_channels as cc on cc.channelID=ch.id", userID).Scan(&channelModel.ID, &channelModel.ChannelID, &channelModel.ChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &userModel.ID, &userModel.UserID, &companyModel.ID); err != nil {
+	channelSetting := new(models.ChannelSetting)
+	if err := db.QueryRow("SELECT ch.id,ch.channelID,ch.channelName,ch.channelURL,ch.channelType,us.id,us.userID,cc.companyID,cse.joinVerify,cse.newMessageVerify,cse.replyVerify,cse.directVerify from `channels` as ch inner join `users_current_active_channel` as uc on ch.id=uc.channelID and uc.status='ACTIVE' inner join `users` as us on uc.userID=us.id and us.userID=? and us.`status`='ACTIVE' inner join companies_channels as cc on cc.channelID=ch.id left join channels_settings as cse on cse.channelID=ch.id", userID).Scan(&channelModel.ID, &channelModel.ChannelID, &channelModel.ChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &userModel.ID, &userModel.UserID, &companyModel.ID, &channelSetting.JoinVerify, &channelSetting.NewMessageVerify, &channelSetting.ReplyVerify, &channelSetting.DirectVerify); err != nil {
 		log.Println(err)
 		return channelModel
 	}
 	channelModel.User = userModel
 	channelModel.Company = companyModel
+	channelModel.Setting = channelSetting
 	return channelModel
 }
 
