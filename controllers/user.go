@@ -9,6 +9,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
 	"math/rand"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -238,19 +239,95 @@ func (service *BotService) RegisterUserWithEmailAndCode(db *sql.DB, app *config.
 		log.Println(err)
 		return true
 	}
-	SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.JOIN_REQUEST_ADDED"))
+	SaveUserLastState(db, app, bot, "register_"+strconv.FormatInt(userModelData.ID, 10)+"_"+strconv.FormatInt(channelID, 10), m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
 	options := new(tb.SendOptions)
-	startBTN := tb.InlineButton{
-		Text: config.LangConfig.GetString("MESSAGES.CLICK_HERE_TO_START_COMMUNICATION"),
-		URL:  channelModel.ChannelURL,
+	options.ParseMode = tb.ModeMarkdown
+	bot.Send(userModel, config.LangConfig.GetString("MESSAGES.YOU_ARE_MEMBER_OF_CHANNEL")+channelModel.ChannelType+" "+channelModel.ChannelName+" \n"+config.LangConfig.GetString("MESSAGES.USERNAME_MESSAGE"), options)
+	return true
+}
+
+func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState) bool {
+	channelData := strings.Split(lastState.Data, "_")
+	channelID, err := strconv.ParseInt(channelData[2], 10, 0)
+	if err != nil {
+		log.Println(err)
+		return true
 	}
-	replyKeys := [][]tb.InlineButton{
-		[]tb.InlineButton{startBTN},
+	channelModel := new(models.Channel)
+	if err := db.QueryRow("SELECT channelID,channelURL,manualChannelName,channelName,channelType FROM `channels` where id=?", channelID).Scan(&channelModel.ChannelID, &channelModel.ChannelURL, &channelModel.ManualChannelName, &channelModel.ChannelName, &channelModel.ChannelType); err != nil {
+		log.Println(err)
+		return true
 	}
-	replyModel := new(tb.ReplyMarkup)
-	replyModel.InlineKeyboard = replyKeys
-	options.ReplyMarkup = replyModel
-	bot.Send(userModel, config.LangConfig.GetString("MESSAGES.YOU_ARE_MEMBER_OF_CHANNEL")+channelModel.ChannelType+" "+channelModel.ChannelName, options)
+	if len(m.Text) > 4 {
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
+		return true
+	}
+	emojiLetter := m.Text[0:1]
+	hasEmoji, err := regexp.MatchString(`(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])`, emojiLetter)
+	if err != nil {
+		log.Println(err)
+		return true
+	}
+	if !hasEmoji {
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
+		return true
+	}
+	anotherUsernameLetters := m.Text[1:]
+	hasRightFormat, err := regexp.MatchString(`([A-Za-z]+[0-9]|[0-9]+[A-Za-z])[A-Za-z0-9]*`, anotherUsernameLetters)
+	if err != nil {
+		log.Println(err)
+		return true
+	}
+	if !hasRightFormat {
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
+		return true
+	}
+	usersUserNameModel := new(models.UserUserName)
+	if err := db.QueryRow("SELECT id FROM `users_usernames` where channelID=? and username=?", channelID, m.Text).Scan(&usersUserNameModel.ID); err == nil {
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USERNAME_IS_TAKEN"))
+		return true
+	}
+	userID, err := strconv.ParseInt(channelData[1], 10, 0)
+	if err != nil {
+		log.Println(err)
+		return true
+	}
+	insertCompanyRequest, err := db.Query("INSERT INTO `users_usernames` (`userID`,`channelID`,`username`,`createdAt`) VALUES(?,?,?,?)", userID, channelID, m.Text, app.CurrentTime)
+	if err != nil {
+		log.Println(err)
+		return true
+	}
+	defer insertCompanyRequest.Close()
+	switch channelData[0] {
+	case "register":
+		options := new(tb.SendOptions)
+		startBTN := tb.InlineButton{
+			Text: config.LangConfig.GetString("MESSAGES.CLICK_HERE_TO_START_COMMUNICATION"),
+			URL:  channelModel.ChannelURL,
+		}
+		replyKeys := [][]tb.InlineButton{
+			[]tb.InlineButton{startBTN},
+		}
+		replyModel := new(tb.ReplyMarkup)
+		replyModel.InlineKeyboard = replyKeys
+		options.ReplyMarkup = replyModel
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.YOU_HAVE_AN_PSEUDONYM")+channelModel.ChannelType+" "+channelModel.ChannelName, options)
+		return true
+	case "compose":
+		return true
+	case "reply":
+		return true
+	default:
+		return true
+	}
+}
+
+func (service *BotService) checkUserHaveUserName(db *sql.DB, app *config.App, channelID, userID int64) bool {
+	usersUserNameModel := new(models.UserUserName)
+	if err := db.QueryRow("SELECT id FROM `users_usernames` where userID=? and channelID=?", userID, channelID).Scan(&usersUserNameModel.ID); err != nil {
+		log.Println(err)
+		return false
+	}
 	return true
 }
 

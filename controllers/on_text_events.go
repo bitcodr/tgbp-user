@@ -98,6 +98,8 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			goto ConfirmRegisterUserForTheCompany
 		case lastState.State == config.LangConfig.GetString("STATE.EMAIL_FOR_USER_REGISTRATION"):
 			goto RegisterUserWithEmailAndCode
+		case lastState.State == config.LangConfig.GetString("STATE.ADD_PSEUDONYM"):
+			goto SetUserUserName
 		default:
 			bot.Send(message.Sender, "Your message "+message.Text+" is not being processed or sent to any individual, channel or group.")
 			goto END
@@ -176,6 +178,15 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
 			UserState:  config.LangConfig.GetString("STATE.EMAIL_FOR_USER_REGISTRATION"),
 			Controller: "RegisterUserWithEmailAndCode",
+		}) {
+			Init(app, bot, true)
+		}
+		goto END
+
+	SetUserUserName:
+		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
+			UserState:  config.LangConfig.GetString("STATE.ADD_PSEUDONYM"),
+			Controller: "SetUserUserName",
 		}) {
 			Init(app, bot, true)
 		}

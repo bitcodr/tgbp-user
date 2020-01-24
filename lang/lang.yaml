@@ -42,6 +42,7 @@ STATE:
   CANCEL_USER_REGISTRATION: cancel_user_registration_for_the_company
   USER_NOT_REGISTERED: user_not_registered
   JOIN_TO_GROUP_CHANNEL: "join_to_"
+  ADD_PSEUDONYM: "add_pseudonym"
 
 MESSAGES:
   DATA_MUST_NOT_BE_NULL: "final data must not be null"
@@ -90,7 +91,11 @@ MESSAGES:
   BACK_TO: "⬅️Back to "
   YOU_DO_NOT_HAVE_PREMISSION_TO_SEND_A_MESSAGE: "You should first confirm your company email for sending a message"
   DM_HISTORY: "DM history: You & "
-  THERE_IS_NO_COMPANY_TO_JOIN : "Your requested channel to join doesn't exist"
+  THERE_IS_NO_COMPANY_TO_JOIN: "Your requested channel to join doesn't exist"
+  USERNAME_MESSAGE: "Please set a pseudonym for your self in the channel before to start messaging \n*Notice:* the username must be 4 character without any spaces, the first letter must be an emoji and the last 3 ones must be combination of letters and numbers like: 🌞5h3 or 🌞jd1, ..."
+  YOU_HAVE_AN_PSEUDONYM: "Your pseudonym has been sat for "
+  USERNAME_IS_TAKEN: "The pseudonym already exist, choose another one"
+  USER_NAME_IS_WRONG: "The username must be 4 character without any spaces, the first letter must be an emoji and the last 3 ones must be combination of letters and numbers like: 🌞5h3 or 🌞jd1, ..."
 
 COMMANDS:
   ENABLE_CHAT: "/enable_anonymity_support"
