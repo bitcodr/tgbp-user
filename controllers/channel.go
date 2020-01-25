@@ -472,7 +472,7 @@ func (service *BotService) SendAndSaveDirectMessage(db *sql.DB, app *config.App,
 							}
 							dmHistory := tb.InlineButton{
 								Text: config.LangConfig.GetString("MESSAGES.DM_HISTORY") + " [User " + newUsernameModel.Username + "]",
-								URL:  app.APIURL + "/user/" + senderID + "/receiver/" + userID + "/direct-messages",
+								URL:  app.APIURL + "/user/" + senderID + "/receiver/" + userID + "/channel/" + strconv.FormatInt(channelModel.ID, 10) + "/direct-messages",
 							}
 							var AnotherDMKeys [][]tb.InlineButton
 							if channelModel.ChannelURL != "" {
@@ -563,7 +563,7 @@ func (service *BotService) SendAnswerAndSaveDirectMessage(db *sql.DB, app *confi
 						}
 						dmHistory := tb.InlineButton{
 							Text: config.LangConfig.GetString("MESSAGES.DM_HISTORY") + " [User " + usernameModel.Username + "]",
-							URL:  app.APIURL + "/user/" + senderID + "/receiver/" + userID + "/direct-messages",
+							URL:  app.APIURL + "/user/" + senderID + "/receiver/" + userID + "/channel/" + strconv.FormatInt(channelModel.ID, 10) + "/direct-messages",
 						}
 						var AnotherDMKeys [][]tb.InlineButton
 						if channelModel.ChannelURL != "" {
