@@ -98,6 +98,7 @@ MESSAGES:
   USERNAME_IS_TAKEN: "The pseudonym already exist, choose another one"
   USER_NAME_IS_WRONG: "The username must be 4 character without any spaces, the first letter must be an emoji and the last 3 ones must be combination of letters and numbers like: 🌞5h3 or 🌞jd1, ..."
   YOUR_PSEUDONYM_ADDED_SUCCESFULLY: "Your pseudonym added successfully, "
+  USER_WITH_THIS_EMAIL_EXIST: "User with this email address exist, register with another one"
 
 COMMANDS:
   ENABLE_CHAT: "/enable_anonymity_support"

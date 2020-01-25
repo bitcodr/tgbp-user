@@ -41,6 +41,11 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.NOT_ALLOWED_PUBLIC_EMAIL"), options)
 			return true
 		}
+		userDataModel := new(models.User)
+		if err := db.QueryRow("SELECT us.id from `users` as us inner join users_channels as uc on us.id=uc.userID and uc.status='ACTIVE' where us.email=?", text).Scan(&userDataModel.ID); err == nil {
+			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.USER_WITH_THIS_EMAIL_EXIST"))
+			return true
+		}
 		service.checkTheCompanyEmailSuffixExist(app, bot, text, "@"+emailSuffix[1], db, userModel, channelModel, companyModel)
 		return true
 	}
@@ -259,10 +264,6 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 		log.Println(err)
 		return true
 	}
-	// if len(m.Text) > 4 {
-	// 	bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
-	// 	return true
-	// }
 	emojiLetter := emoji.FindAll(m.Text)
 	if emojiLetter == nil || len(emojiLetter) > 1 || (emojiLetter[0].Locations != nil && len(emojiLetter[0].Locations) == 1 && len(emojiLetter[0].Locations[0]) == 2 && emojiLetter[0].Locations[0][0] != 0 && emojiLetter[0].Locations[0][1] != 1) {
 		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
@@ -410,7 +411,7 @@ func (service *BotService) CheckUserRegisteredOrNot(db *sql.DB, app *config.App,
 				replyModel := new(tb.ReplyMarkup)
 				replyModel.ReplyKeyboardRemove = true
 				options.ReplyMarkup = replyModel
-				bot.Send(m.Sender, "You Should first verify your account, Please enter your email in the "+channel.ChannelType+" "+channel.ChannelName+" belongs to the company "+channel.Company.CompanyName+" for verification", options)
+				bot.Send(m.Sender, "You should first verify your account, Please enter your email in the "+channel.ChannelType+" "+channel.ChannelName+" belongs to the company "+channel.Company.CompanyName+" for verification", options)
 				return true
 			}
 		}
