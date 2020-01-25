@@ -311,11 +311,25 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 		replyModel := new(tb.ReplyMarkup)
 		replyModel.InlineKeyboard = replyKeys
 		options.ReplyMarkup = replyModel
+		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.JOIN_COMPLETED"))
 		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.YOU_HAVE_AN_PSEUDONYM")+channelModel.ChannelType+" "+channelModel.ChannelName, options)
 		return true
 	case "compose":
+		newComposeMessage := new(tb.Message)
+		newComposeMessage.Sender = m.Sender
+		newComposeMessage.Text = config.LangConfig.GetString("COMMANDS.START_COMPOSE_IN_GROUP") + channelModel.ChannelID
+		generalEventsHandler(app, bot, newComposeMessage, &Event{
+			UserState:  config.LangConfig.GetString("STATE.NEW_MESSAGE_TO_GROUP"),
+			Command:    config.LangConfig.GetString("STATE.COMPOSE_MESSAGE") + "_",
+			Command1:   config.LangConfig.GetString("COMMANDS.START_COMPOSE_IN_GROUP"),
+			Controller: "NewMessageGroupHandler",
+		})
 		return true
 	case "reply":
+		// service.SendReply(app, bot, m, newRequest)
+		return true
+	case "dm":
+		// service.SendReply(app, bot, m, newRequest)
 		return true
 	default:
 		return true
@@ -343,8 +357,10 @@ func (service *BotService) GetUserByTelegramID(db *sql.DB, app *config.App, user
 
 func GetUserLastState(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, user int) *models.UserLastState {
 	userLastState := new(models.UserLastState)
-	if err := db.QueryRow("SELECT `data`,`state`,`userID` from `users_last_state` where `userId`=? order by `id` DESC limit 1", user).Scan(&userLastState.Data, &userLastState.State, &userLastState.UserID); err != nil {
+	userModel := new(models.User)
+	if err := db.QueryRow("SELECT ul.data,ul.state,ul.userID,use.id from `users_last_state` as ul inner join users as use on use.userID=ul.userID where ul.userId=? order by ul.id DESC limit 1", user).Scan(&userLastState.Data, &userLastState.State, &userLastState.UserID, &userModel.ID); err != nil {
 		log.Println(err)
+		userLastState.User = userModel
 		userLastState.Status = "INACTIVE"
 		return userLastState
 	}

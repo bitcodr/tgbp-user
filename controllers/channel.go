@@ -157,8 +157,13 @@ func (service *BotService) SendReply(app *config.App, bot *tb.Bot, m *tb.Message
 		service.JoinFromGroup(db, app, bot, m, channelID)
 		channelModel := new(models.Channel)
 		messageModel := new(models.Message)
-		if err := db.QueryRow("SELECT ch.channelName,me.message FROM `channels` as ch inner join messages as me on ch.id=me.channelID and me.botMessageID=? where ch.channelID=?", messageID, channelID).Scan(&channelModel.ChannelName, &messageModel.Message); err != nil {
+		if err := db.QueryRow("SELECT ch.id,ch.channelName,me.message FROM `channels` as ch inner join messages as me on ch.id=me.channelID and me.botMessageID=? where ch.channelID=?", messageID, channelID).Scan(&channelModel.ID, &channelModel.ChannelName, &messageModel.Message); err != nil {
 			log.Println(err)
+			return true
+		}
+		if !service.checkUserHaveUserName(db, app, channelModel.ID, lastState.User.ID) {
+			SaveUserLastState(db, app, bot, "reply_"+strconv.FormatInt(lastState.User.ID, 10)+"_"+strconv.FormatInt(channelModel.ID, 10), m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
+			bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USERNAME_MESSAGE"))
 			return true
 		}
 		var maxLenOfString int
@@ -209,6 +214,11 @@ func (service *BotService) SanedDM(app *config.App, bot *tb.Bot, m *tb.Message, 
 		options.ParseMode = tb.ModeHTML
 		user := service.GetUserByTelegramID(db, app, directSenderID)
 		channel := service.GetChannelByTelegramID(db, app, channelID)
+		if !service.checkUserHaveUserName(db, app, channel.ID, lastState.User.ID) {
+			SaveUserLastState(db, app, bot, "dm_"+strconv.FormatInt(lastState.User.ID, 10)+"_"+strconv.FormatInt(channel.ID, 10), m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
+			bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USERNAME_MESSAGE"))
+			return true
+		}
 		_, err = bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_SEND_YOUR_DIRECT")+"<b>"+user.CustomID+"</b> "+config.LangConfig.GetString("GENERAL.FROM")+": <b>"+channel.ChannelName+"</b>", options)
 		if err != nil {
 			log.Println(err)
@@ -614,7 +624,7 @@ func (service *BotService) GetUserCurrentActiveChannel(db *sql.DB, app *config.A
 	channelModel := new(models.Channel)
 	companyModel := new(models.Company)
 	channelSetting := new(models.ChannelSetting)
-	if err := db.QueryRow("SELECT ch.uniqueID,ch.id,ch.channelID,ch.channelName,ch.manualChannelName,ch.channelURL,ch.channelType,us.id,us.userID,cc.companyID,cse.joinVerify,cse.newMessageVerify,cse.replyVerify,cse.directVerify from `channels` as ch inner join `users_current_active_channel` as uc on ch.id=uc.channelID and uc.status='ACTIVE' inner join `users` as us on uc.userID=us.id and us.userID=? and us.`status`='ACTIVE' inner join companies_channels as cc on cc.channelID=ch.id left join channels_settings as cse on cse.channelID=ch.id", userID).Scan(&channelModel.UniqueID,&channelModel.ID, &channelModel.ChannelID, &channelModel.ChannelName, &channelModel.ManualChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &userModel.ID, &userModel.UserID, &companyModel.ID, &channelSetting.JoinVerify, &channelSetting.NewMessageVerify, &channelSetting.ReplyVerify, &channelSetting.DirectVerify); err != nil {
+	if err := db.QueryRow("SELECT ch.uniqueID,ch.id,ch.channelID,ch.channelName,ch.manualChannelName,ch.channelURL,ch.channelType,us.id,us.userID,cc.companyID,cse.joinVerify,cse.newMessageVerify,cse.replyVerify,cse.directVerify from `channels` as ch inner join `users_current_active_channel` as uc on ch.id=uc.channelID and uc.status='ACTIVE' inner join `users` as us on uc.userID=us.id and us.userID=? and us.`status`='ACTIVE' inner join companies_channels as cc on cc.channelID=ch.id left join channels_settings as cse on cse.channelID=ch.id", userID).Scan(&channelModel.UniqueID, &channelModel.ID, &channelModel.ChannelID, &channelModel.ChannelName, &channelModel.ManualChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &userModel.ID, &userModel.UserID, &companyModel.ID, &channelSetting.JoinVerify, &channelSetting.NewMessageVerify, &channelSetting.ReplyVerify, &channelSetting.DirectVerify); err != nil {
 		log.Println(err)
 		return channelModel
 	}
@@ -626,7 +636,7 @@ func (service *BotService) GetUserCurrentActiveChannel(db *sql.DB, app *config.A
 
 func (service *BotService) GetChannelByTelegramID(db *sql.DB, app *config.App, channelID string) *models.Channel {
 	channelModel := new(models.Channel)
-	if err := db.QueryRow("SELECT `channelName` from `channels` where `channelID`=? ", channelID).Scan(&channelModel.ChannelName); err != nil {
+	if err := db.QueryRow("SELECT id,`channelName` from `channels` where `channelID`=? ", channelID).Scan(&channelModel.ID, &channelModel.ChannelName); err != nil {
 		log.Println(err)
 		return channelModel
 	}

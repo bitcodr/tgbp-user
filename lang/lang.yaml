@@ -43,6 +43,7 @@ STATE:
   USER_NOT_REGISTERED: user_not_registered
   JOIN_TO_GROUP_CHANNEL: "join_to_"
   ADD_PSEUDONYM: "add_pseudonym"
+  JOIN_COMPLETED: "join_completed"
 
 MESSAGES:
   DATA_MUST_NOT_BE_NULL: "final data must not be null"
@@ -96,6 +97,7 @@ MESSAGES:
   YOU_HAVE_AN_PSEUDONYM: "Your pseudonym has been sat for "
   USERNAME_IS_TAKEN: "The pseudonym already exist, choose another one"
   USER_NAME_IS_WRONG: "The username must be 4 character without any spaces, the first letter must be an emoji and the last 3 ones must be combination of letters and numbers like: 🌞5h3 or 🌞jd1, ..."
+  YOUR_PSEUDONYM_ADDED_SUCCESFULLY: "Your pseudonym added successfully, "
 
 COMMANDS:
   ENABLE_CHAT: "/enable_anonymity_support"

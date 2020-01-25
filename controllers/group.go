@@ -156,8 +156,13 @@ func (service *BotService) NewMessageGroupHandler(app *config.App, bot *tb.Bot, 
 			return true
 		}
 		channelModel := new(models.Channel)
-		if err := db.QueryRow("SELECT `channelName`,`channelType` FROM `channels` where `channelID`=?", channelID).Scan(&channelModel.ChannelName, &channelModel.ChannelType); err != nil {
+		if err := db.QueryRow("SELECT id,`channelName`,`channelType` FROM `channels` where `channelID`=?", channelID).Scan(&channelModel.ID, &channelModel.ChannelName, &channelModel.ChannelType); err != nil {
 			log.Println(err)
+			return true
+		}
+		if !service.checkUserHaveUserName(db, app, channelModel.ID, lastState.User.ID) {
+			SaveUserLastState(db, app, bot, "compose_"+strconv.FormatInt(lastState.User.ID, 10)+"_"+strconv.FormatInt(channelModel.ID, 10), m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
+			bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USERNAME_MESSAGE"))
 			return true
 		}
 		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_DRAFT_YOUR_MESSAGE")+channelModel.ChannelType+" "+channelModel.ChannelName)
