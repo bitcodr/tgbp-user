@@ -11,7 +11,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/amiraliio/tgbp-user/config"
-	"github.com/amiraliio/tgbp-user/helpers"
 	"github.com/amiraliio/tgbp-user/lang"
 	"github.com/amiraliio/tgbp-user/models"
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -160,7 +159,8 @@ func (service *BotService) NewMessageGroupHandler(app *config.App, bot *tb.Bot, 
 			log.Println(err)
 			return true
 		}
-		if !service.checkUserHaveUserName(db, app, channelModel.ID, lastState.User.ID) {
+		usernameState, _ := service.checkUserHaveUserName(db, app, channelModel.ID, lastState.User.ID)
+		if !usernameState {
 			SaveUserLastState(db, app, bot, "compose_"+strconv.FormatInt(lastState.User.ID, 10)+"_"+strconv.FormatInt(channelModel.ID, 10), m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
 			bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USERNAME_MESSAGE"))
 			return true
@@ -212,7 +212,7 @@ func (service *BotService) JoinFromGroup(db *sql.DB, app *config.App, bot *tb.Bo
 			log.Println(err)
 			return
 		}
-		userInsert, err := transaction.Exec("INSERT INTO `users` (`userID`,`username`,`firstName`,`lastName`,`lang`,`isBot`,`customID`,`createdAt`,`updatedAt`) VALUES(?,?,?,?,?,?,?,?,?)", userID, m.Sender.Username, m.Sender.FirstName, m.Sender.LastName, m.Sender.LanguageCode, isBotValue, helpers.Hash(userID+channelID), app.CurrentTime, app.CurrentTime)
+		userInsert, err := transaction.Exec("INSERT INTO `users` (`userID`,`username`,`firstName`,`lastName`,`lang`,`isBot`,`createdAt`,`updatedAt`) VALUES(?,?,?,?,?,?,?,?)", userID, m.Sender.Username, m.Sender.FirstName, m.Sender.LastName, m.Sender.LanguageCode, isBotValue, app.CurrentTime, app.CurrentTime)
 		if err != nil {
 			transaction.Rollback()
 			log.Println(err)

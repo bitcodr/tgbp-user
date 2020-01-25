@@ -318,26 +318,47 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 		newComposeMessage := new(tb.Message)
 		newComposeMessage.Sender = m.Sender
 		newComposeMessage.Text = config.LangConfig.GetString("COMMANDS.START_COMPOSE_IN_GROUP") + channelModel.ChannelID
-		generalEventsHandler(app, bot, newComposeMessage, &Event{
+		return generalEventsHandler(app, bot, newComposeMessage, &Event{
 			UserState:  config.LangConfig.GetString("STATE.NEW_MESSAGE_TO_GROUP"),
 			Command:    config.LangConfig.GetString("STATE.COMPOSE_MESSAGE") + "_",
 			Command1:   config.LangConfig.GetString("COMMANDS.START_COMPOSE_IN_GROUP"),
 			Controller: "NewMessageGroupHandler",
 		})
-		return true
 	case "reply":
-		//TODO
-		return true
+		newReplyMessage := new(tb.Message)
+		newReplyMessage.Sender = m.Sender
+		newReplyMessage.Text = config.LangConfig.GetString("COMMANDS.START_REPLY") + channelModel.ChannelID + "_" + strconv.Itoa(m.Sender.ID) + "_" + channelData[3]
+		return generalEventsHandler(app, bot, newReplyMessage, &Event{
+			UserState:  config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE"),
+			Command:    config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") + "_",
+			Command1:   config.LangConfig.GetString("COMMANDS.START_REPLY"),
+			Controller: "SendReply",
+		})
 	case "dm":
-		//TODO
-		//TODO also showing the new username
-		return true
+		newDMMessage := new(tb.Message)
+		newDMMessage.Sender = m.Sender
+		newDMMessage.Text = config.LangConfig.GetString("COMMANDS.START_REPLY_DM") + channelModel.ChannelID + "_" + strconv.Itoa(m.Sender.ID) + "_" + channelData[3]
+		return generalEventsHandler(app, bot, newDMMessage, &Event{
+			UserState:  config.LangConfig.GetString("STATE.REPLY_BY_DM"),
+			Command:    config.LangConfig.GetString("STATE.REPLY_BY_DM") + "_",
+			Command1:   config.LangConfig.GetString("COMMANDS.START_REPLY_DM"),
+			Controller: "SanedDM",
+		})
 	default:
 		return true
 	}
 }
 
-func (service *BotService) checkUserHaveUserName(db *sql.DB, app *config.App, channelID, userID int64) bool {
+func (service *BotService) checkUserHaveUserName(db *sql.DB, app *config.App, channelID, userID int64) (bool, *models.UserUserName) {
+	usersUserNameModel := new(models.UserUserName)
+	if err := db.QueryRow("SELECT id,username FROM `users_usernames` where userID=? and channelID=?", userID, channelID).Scan(&usersUserNameModel.ID, &usersUserNameModel.Username); err != nil {
+		log.Println(err)
+		return false, nil
+	}
+	return true, usersUserNameModel
+}
+
+func (service *BotService) getUserUsername(db *sql.DB, app *config.App, channelID, userID int64) bool {
 	usersUserNameModel := new(models.UserUserName)
 	if err := db.QueryRow("SELECT id FROM `users_usernames` where userID=? and channelID=?", userID, channelID).Scan(&usersUserNameModel.ID); err != nil {
 		log.Println(err)
@@ -348,7 +369,7 @@ func (service *BotService) checkUserHaveUserName(db *sql.DB, app *config.App, ch
 
 func (service *BotService) GetUserByTelegramID(db *sql.DB, app *config.App, userID int) *models.User {
 	userModel := new(models.User)
-	if err := db.QueryRow("SELECT `id`,`userID`,`customID` from `users` where `userID`=? ", userID).Scan(&userModel.ID, &userModel.UserID, &userModel.CustomID); err != nil {
+	if err := db.QueryRow("SELECT `id`,`userID` from `users` where `userID`=? ", userID).Scan(&userModel.ID, &userModel.UserID); err != nil {
 		log.Println(err)
 		userModel.Status = "INACTIVE"
 		return userModel

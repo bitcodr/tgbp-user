@@ -10,7 +10,6 @@ type User struct {
 	Lang      string        `json:"lang"`
 	Email     string        `json:"email"`
 	IsBot     string        `json:"isBot"`
-	CustomID  string        `json:"customID"` //TODO must remove
 	CreatedAt string        `json:"createdAt"`
 	UpdatedAt string        `json:"updatedAt"`
 	Channels  []*Channel    `json:"channels"`
