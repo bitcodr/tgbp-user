@@ -381,10 +381,10 @@ func GetUserLastState(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, u
 	userModel := new(models.User)
 	if err := db.QueryRow("SELECT ul.data,ul.state,ul.userID,us.id from `users_last_state` as ul inner join users as us on us.userID=ul.userID where ul.userId=? order by ul.id DESC limit 1", user).Scan(&userLastState.Data, &userLastState.State, &userLastState.UserID, &userModel.ID); err != nil {
 		log.Println(err)
-		userLastState.User = userModel
 		userLastState.Status = "INACTIVE"
 		return userLastState
 	}
+	userLastState.User = userModel
 	return userLastState
 }
 
