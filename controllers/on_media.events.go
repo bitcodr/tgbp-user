@@ -20,6 +20,10 @@ func onMediaEvents(app *config.App, bot *tb.Bot) {
 			goto SaveAndSendMessage
 		case lastState.State == config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE"):
 			goto SendAndSaveReplyMessage
+		case lastState.State == config.LangConfig.GetString("STATE.REPLY_BY_DM"):
+			goto SendAndSaveDirectMessage
+		case lastState.State == config.LangConfig.GetString("STATE.ANSWER_TO_DM"):
+			goto SendAnswerAndSaveDirectMessage
 		default:
 			goto END
 		}
@@ -40,6 +44,27 @@ func onMediaEvents(app *config.App, bot *tb.Bot) {
 			Command:    config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") + "_",
 			Command1:   config.LangConfig.GetString("COMMANDS.START_REPLY"),
 			Controller: "SendAndSaveReplyMessage",
+		}) {
+			Init(app, bot, true)
+		}
+		goto END
+
+	SendAndSaveDirectMessage:
+		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
+			UserState:  config.LangConfig.GetString("STATE.REPLY_BY_DM"),
+			Command:    config.LangConfig.GetString("STATE.REPLY_BY_DM") + "_",
+			Command1:   config.LangConfig.GetString("COMMANDS.START_REPLY_DM"),
+			Controller: "SendAndSaveDirectMessage",
+		}) {
+			Init(app, bot, true)
+		}
+		goto END
+
+	SendAnswerAndSaveDirectMessage:
+		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
+			UserState:  config.LangConfig.GetString("STATE.ANSWER_TO_DM"),
+			Command:    config.LangConfig.GetString("STATE.ANSWER_TO_DM") + "_",
+			Controller: "SendAnswerAndSaveDirectMessage",
 		}) {
 			Init(app, bot, true)
 		}
