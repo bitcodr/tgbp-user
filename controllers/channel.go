@@ -214,7 +214,7 @@ func (service *BotService) SanedDM(app *config.App, bot *tb.Bot, m *tb.Message, 
 		options := new(tb.SendOptions)
 		options.ParseMode = tb.ModeHTML
 		channel := service.GetChannelByTelegramID(db, app, channelID)
-		user := service.GetUserByTelegramID(db, app, directSenderID)
+		user := service.GetUserByTelegramID(db, app, m.Sender.ID)
 		usernamemodel, err := service.checkUserHaveUserName(db, app, channel.ID, user.ID)
 		if err != nil {
 			SaveUserLastState(db, app, bot, "dm_"+strconv.FormatInt(lastState.User.ID, 10)+"_"+strconv.FormatInt(channel.ID, 10)+"_"+data[2], m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
@@ -261,7 +261,7 @@ func (service *BotService) SanedAnswerDM(app *config.App, bot *tb.Bot, m *tb.Cal
 		options.ParseMode = tb.ModeHTML
 		channelID := strings.TrimSpace(data[0])
 		channel := service.GetChannelByTelegramID(db, app, channelID)
-		user := service.GetUserByTelegramID(db, app, directSenderID)
+		user := service.GetUserByTelegramID(db, app, m.Sender.ID)
 		usernamemodel, err := service.checkUserHaveUserName(db, app, channel.ID, user.ID)
 		if err != nil {
 			SaveUserLastState(db, app, bot, "dm_"+strconv.FormatInt(lastState.User.ID, 10)+"_"+strconv.FormatInt(channel.ID, 10)+"_"+data[2], m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
