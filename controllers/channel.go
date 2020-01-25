@@ -308,11 +308,34 @@ func (service *BotService) SaveAndSendMessage(db *sql.DB, app *config.App, bot *
 			replyModel.InlineKeyboard = inlineKeys
 			options.ReplyMarkup = replyModel
 			options.ParseMode = tb.ModeHTML
-			message, err := bot.Send(user, "[User "+usernameModel.Username+"] "+m.Text, options)
+			var message *tb.Message
+			var err error
+			var messageType, saveMessage string
+			switch {
+			case m.Photo != nil:
+				messageType = "PHOTO"
+				saveMessage = m.Photo.MediaFile().FileID
+				m.Photo.Caption = "[User " + usernameModel.Username + "]"
+				message, err = bot.Send(user, m.Photo, options)
+			case m.Video != nil:
+				saveMessage = m.Video.MediaFile().FileID
+				messageType = "VIDEO"
+				m.Video.Caption = "[User " + usernameModel.Username + "]"
+				message, err = bot.Send(user, m.Video, options)
+			case m.Audio != nil:
+				saveMessage = m.Audio.MediaFile().FileID
+				messageType = "AUDIO"
+				m.Audio.Caption = "[User " + usernameModel.Username + "]"
+				message, err = bot.Send(user, m.Audio, options)
+			default:
+				messageType = "TEXT"
+				saveMessage = m.Text
+				message, err = bot.Send(user, "[User "+usernameModel.Username+"] "+m.Text, options)
+			}
 			if err == nil {
 				channelMessageID := strconv.Itoa(message.ID)
 				channelID := strconv.FormatInt(activeChannel.ID, 10)
-				insertedMessage, err := db.Query("INSERT INTO `messages` (`message`,`userID`,`channelID`,`channelMessageID`,`botMessageID`,`type`,`createdAt`) VALUES(?,?,?,?,?,?,?)", m.Text, senderID, channelID, channelMessageID, botMessageID, "NEW", app.CurrentTime)
+				insertedMessage, err := db.Query("INSERT INTO `messages` (`messageType`,`message`,`userID`,`channelID`,`channelMessageID`,`botMessageID`,`type`,`createdAt`) VALUES(?,?,?,?,?,?,?,?)", messageType, saveMessage, senderID, channelID, channelMessageID, botMessageID, "NEW", app.CurrentTime)
 				if err != nil {
 					log.Println(err)
 					return true
@@ -399,14 +422,37 @@ func (service *BotService) SendAndSaveReplyMessage(db *sql.DB, app *config.App, 
 							newSendOption.ParseMode = tb.ModeHTML
 							user := new(tb.User)
 							user.ID = channelIntValue
-							sendMessage, err := bot.Send(user, "[User "+usernameModel.Username+"] "+m.Text, newSendOption)
+							var sendMessage *tb.Message
+							var err error
+							var messageType, saveMessage string
+							switch {
+							case m.Photo != nil:
+								messageType = "PHOTO"
+								saveMessage = m.Photo.MediaFile().FileID
+								m.Photo.Caption = "[User " + usernameModel.Username + "]"
+								sendMessage, err = bot.Send(user, m.Photo, newSendOption)
+							case m.Video != nil:
+								saveMessage = m.Video.MediaFile().FileID
+								messageType = "VIDEO"
+								m.Video.Caption = "[User " + usernameModel.Username + "]"
+								sendMessage, err = bot.Send(user, m.Video, newSendOption)
+							case m.Audio != nil:
+								saveMessage = m.Audio.MediaFile().FileID
+								messageType = "AUDIO"
+								m.Audio.Caption = "[User " + usernameModel.Username + "]"
+								sendMessage, err = bot.Send(user, m.Audio, newSendOption)
+							default:
+								messageType = "TEXT"
+								saveMessage = m.Text
+								sendMessage, err = bot.Send(user, "[User "+usernameModel.Username+"] "+m.Text, newSendOption)
+							}
 							if err == nil {
 								newChannelMessageID := strconv.Itoa(sendMessage.ID)
 								parentID := strconv.FormatInt(messageModel.ID, 10)
 								newChannelModel := new(models.Channel)
 								if err := db.QueryRow("SELECT id,channelName,channelType from `channels` where channelID=?", channelID).Scan(&newChannelModel.ID, &newChannelModel.ChannelName, &newChannelModel.ChannelType); err == nil {
 									newChannelModelID := strconv.FormatInt(newChannelModel.ID, 10)
-									insertedMessage, err := db.Query("INSERT INTO `messages` (`message`,`userID`,`channelID`,`channelMessageID`,`botMessageID`,`parentID`,`type`,`createdAt`) VALUES(?,?,?,?,?,?,?,?)", m.Text, senderID, newChannelModelID, newChannelMessageID, newBotMessageID, parentID, "REPLY", app.CurrentTime)
+									insertedMessage, err := db.Query("INSERT INTO `messages` (`messageType`,`message`,`userID`,`channelID`,`channelMessageID`,`botMessageID`,`parentID`,`type`,`createdAt`) VALUES(?,?,?,?,?,?,?,?,?)", messageType, saveMessage, senderID, newChannelModelID, newChannelMessageID, newBotMessageID, parentID, "REPLY", app.CurrentTime)
 									if err != nil {
 										log.Println(err)
 										return true

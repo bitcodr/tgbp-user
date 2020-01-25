@@ -11,6 +11,7 @@ import (
 
 func onTextEvents(app *config.App, bot *tb.Bot) {
 
+
 	bot.Handle(tb.OnText, func(message *tb.Message) {
 		if !message.Private() {
 			return
@@ -36,7 +37,7 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		}
 
 	SendReply:
-		if generalEventsHandler(app, bot, message, &Event{ 
+		if generalEventsHandler(app, bot, message, &Event{
 			UserState:  config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE"),
 			Command:    config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") + "_",
 			Command1:   config.LangConfig.GetString("COMMANDS.START_REPLY"),

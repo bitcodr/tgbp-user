@@ -10,6 +10,7 @@ type Message struct {
 	ChannelMessageID string   `json:"channelMessageID"`
 	BotMessageID     string   `json:"botMessageID"`
 	Message          string   `json:"message"`
+	MessageType      string   `json:"messageType"`
 	Receiver         int64    `json:"receiver"`
 	Type             string   `json:"type"`
 	User             *User    `json:"user"`

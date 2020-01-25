@@ -19,6 +19,7 @@ func Init(app *config.App, bot *tb.Bot, state interface{}) {
 		return
 	}
 	onActionEvents(app, bot)
+	onMediaEvents(app, bot)
 	onTextEvents(app, bot)
 	onCallbackEvents(app, bot)
 }
