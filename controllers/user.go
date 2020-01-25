@@ -349,13 +349,12 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 	}
 }
 
-func (service *BotService) checkUserHaveUserName(db *sql.DB, app *config.App, channelID, userID int64) *models.UserUserName {
+func (service *BotService) checkUserHaveUserName(db *sql.DB, app *config.App, channelID, userID int64) (*models.UserUserName, error) {
 	usersUserNameModel := new(models.UserUserName)
 	if err := db.QueryRow("SELECT id,username FROM `users_usernames` where userID=? and channelID=?", userID, channelID).Scan(&usersUserNameModel.ID, &usersUserNameModel.Username); err != nil {
-		log.Println(err)
-		return nil
+		return nil, err
 	}
-	return usersUserNameModel
+	return usersUserNameModel, nil
 }
 
 func (service *BotService) getUserUsername(db *sql.DB, app *config.App, channelID, userID int64) bool {
