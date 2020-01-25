@@ -326,10 +326,11 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 		})
 		return true
 	case "reply":
-		// service.SendReply(app, bot, m, newRequest)
+		//TODO
 		return true
 	case "dm":
-		// service.SendReply(app, bot, m, newRequest)
+		//TODO
+		//TODO also showing the new username
 		return true
 	default:
 		return true
