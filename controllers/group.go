@@ -159,8 +159,8 @@ func (service *BotService) NewMessageGroupHandler(app *config.App, bot *tb.Bot, 
 			log.Println(err)
 			return true
 		}
-		usernameState, _ := service.checkUserHaveUserName(db, app, channelModel.ID, lastState.User.ID)
-		if !usernameState {
+		usernameState := service.checkUserHaveUserName(db, app, channelModel.ID, lastState.User.ID)
+		if usernameState == nil {
 			SaveUserLastState(db, app, bot, "compose_"+strconv.FormatInt(lastState.User.ID, 10)+"_"+strconv.FormatInt(channelModel.ID, 10), m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
 			bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USERNAME_MESSAGE"))
 			return true

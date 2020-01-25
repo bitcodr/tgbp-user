@@ -349,13 +349,13 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 	}
 }
 
-func (service *BotService) checkUserHaveUserName(db *sql.DB, app *config.App, channelID, userID int64) (bool, *models.UserUserName) {
+func (service *BotService) checkUserHaveUserName(db *sql.DB, app *config.App, channelID, userID int64) *models.UserUserName {
 	usersUserNameModel := new(models.UserUserName)
 	if err := db.QueryRow("SELECT id,username FROM `users_usernames` where userID=? and channelID=?", userID, channelID).Scan(&usersUserNameModel.ID, &usersUserNameModel.Username); err != nil {
 		log.Println(err)
-		return false, nil
+		return nil
 	}
-	return true, usersUserNameModel
+	return usersUserNameModel
 }
 
 func (service *BotService) getUserUsername(db *sql.DB, app *config.App, channelID, userID int64) bool {
@@ -380,7 +380,7 @@ func (service *BotService) GetUserByTelegramID(db *sql.DB, app *config.App, user
 func GetUserLastState(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, user int) *models.UserLastState {
 	userLastState := new(models.UserLastState)
 	userModel := new(models.User)
-	if err := db.QueryRow("SELECT ul.data,ul.state,ul.userID,use.id from `users_last_state` as ul inner join users as use on use.userID=ul.userID where ul.userId=? order by ul.id DESC limit 1", user).Scan(&userLastState.Data, &userLastState.State, &userLastState.UserID, &userModel.ID); err != nil {
+	if err := db.QueryRow("SELECT ul.data,ul.state,ul.userID,us.id from `users_last_state` as ul inner join users as us on us.userID=ul.userID where ul.userId=? order by ul.id DESC limit 1", user).Scan(&userLastState.Data, &userLastState.State, &userLastState.UserID, &userModel.ID); err != nil {
 		log.Println(err)
 		userLastState.User = userModel
 		userLastState.Status = "INACTIVE"
