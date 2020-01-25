@@ -6,6 +6,7 @@ import (
 	"github.com/amiraliio/tgbp-user/config"
 	"github.com/amiraliio/tgbp-user/helpers"
 	"github.com/amiraliio/tgbp-user/models"
+	emoji "github.com/tmdvs/Go-Emoji-Utils"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
 	"math/rand"
@@ -258,27 +259,22 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 		log.Println(err)
 		return true
 	}
-	if len(m.Text) > 4 {
+	// if len(m.Text) > 4 {
+	// 	bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
+	// 	return true
+	// }
+	emojiLetter := emoji.FindAll(m.Text)
+	if emojiLetter == nil || len(emojiLetter) > 1 || (emojiLetter[0].Locations != nil && len(emojiLetter[0].Locations) == 1 && len(emojiLetter[0].Locations[0]) == 2 && emojiLetter[0].Locations[0][0] != 0 && emojiLetter[0].Locations[0][1] != 1) {
 		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
 		return true
 	}
-	emojiLetter := m.Text[0:1]
-	hasEmoji, err := regexp.MatchString(`(\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])`, emojiLetter)
-	if err != nil {
-		log.Println(err)
-		return true
-	}
-	if !hasEmoji {
-		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
-		return true
-	}
-	anotherUsernameLetters := m.Text[1:]
+	anotherUsernameLetters := emoji.RemoveAll(m.Text)
 	hasRightFormat, err := regexp.MatchString(`([A-Za-z]+[0-9]|[0-9]+[A-Za-z])[A-Za-z0-9]*`, anotherUsernameLetters)
 	if err != nil {
 		log.Println(err)
 		return true
 	}
-	if !hasRightFormat {
+	if len(anotherUsernameLetters) != 3 || !hasRightFormat {
 		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
 		return true
 	}
