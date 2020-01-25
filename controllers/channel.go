@@ -260,7 +260,7 @@ func (service *BotService) SanedAnswerDM(app *config.App, bot *tb.Bot, m *tb.Cal
 		options.ParseMode = tb.ModeHTML
 		channelID := strings.TrimSpace(data[0])
 		channel := service.GetChannelByTelegramID(db, app, channelID)
-		usernamemodel,_ := service.checkUserHaveUserName(db, app, channel.ID, lastState.User.ID)
+		usernamemodel, _ := service.checkUserHaveUserName(db, app, channel.ID, lastState.User.ID)
 		_, err = bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_SEND_YOUR_DIRECT")+"<b>"+usernamemodel.Username+"</b> "+config.LangConfig.GetString("GENERAL.FROM")+": <b>"+channel.ChannelName+"</b>", options)
 		if err != nil {
 			log.Println(err)
@@ -276,7 +276,7 @@ func (service *BotService) SaveAndSendMessage(db *sql.DB, app *config.App, bot *
 	if activeChannel != nil {
 		senderID := strconv.Itoa(m.Sender.ID)
 		botMessageID := strconv.Itoa(m.ID)
-		usernameModel,_ := service.checkUserHaveUserName(db, app, activeChannel.ID, lastState.User.ID)
+		usernameModel, _ := service.checkUserHaveUserName(db, app, activeChannel.ID, lastState.User.ID)
 		newReply := tb.InlineButton{
 			Unique: config.LangConfig.GetString("STATE.REPLY_TO_MESSAGE") + "_" + activeChannel.ChannelID + "_" + senderID + "_" + botMessageID,
 			Text:   config.LangConfig.GetString("MESSAGES.REPLY"),
@@ -361,7 +361,7 @@ func (service *BotService) SendAndSaveReplyMessage(db *sql.DB, app *config.App, 
 				senderID := strconv.Itoa(m.Sender.ID)
 				newBotMessageID := strconv.Itoa(m.ID)
 				messageModel := new(models.Message)
-				usernameModel,_ := service.checkUserHaveUserName(db, app, activeChannel.ID, lastState.User.ID)
+				usernameModel, _ := service.checkUserHaveUserName(db, app, activeChannel.ID, lastState.User.ID)
 				if err := db.QueryRow("SELECT me.id,me.channelMessageID from `messages` as me inner join `channels` as ch on me.channelID=ch.id and ch.channelID=? where me.`botMessageID`=? and me.`userID`=?", channelID, botMessageID, userID).Scan(&messageModel.ID, &messageModel.ChannelMessageID); err == nil {
 					channelIntValue, err := strconv.Atoi(channelID)
 					if err == nil {
@@ -461,7 +461,7 @@ func (service *BotService) SendAndSaveDirectMessage(db *sql.DB, app *config.App,
 								return true
 							}
 							userDataModel := service.GetUserByTelegramID(db, app, userIntID)
-							newUsernameModel,_ := service.checkUserHaveUserName(db, app, channelModel.ID, userDataModel.ID)
+							newUsernameModel, _ := service.checkUserHaveUserName(db, app, channelModel.ID, userDataModel.ID)
 							options := new(tb.SendOptions)
 							markup := new(tb.ReplyMarkup)
 							SendAnotherDM := tb.InlineButton{
@@ -496,7 +496,7 @@ func (service *BotService) SendAndSaveDirectMessage(db *sql.DB, app *config.App,
 							bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.DIRECT_HAS_BEEN_SENT")+"<b>"+newUsernameModel.Username+"</b>", options)
 							newReplyModel := new(tb.ReplyMarkup)
 							senderUserDataModel := service.GetUserByTelegramID(db, app, m.Sender.ID)
-							usernameModel,_ := service.checkUserHaveUserName(db, app, channelModel.ID, senderUserDataModel.ID)
+							usernameModel, _ := service.checkUserHaveUserName(db, app, channelModel.ID, senderUserDataModel.ID)
 							newReply := tb.InlineButton{
 								Unique: config.LangConfig.GetString("STATE.ANSWER_TO_DM") + "_" + channelID + "_" + senderID + "_" + newBotMessageID,
 								Text:   config.LangConfig.GetString("MESSAGES.DIRECT_REPLY") + " [User " + usernameModel.Username + "]",
@@ -511,7 +511,7 @@ func (service *BotService) SendAndSaveDirectMessage(db *sql.DB, app *config.App,
 							user := new(tb.User)
 							user.ID = userIDInInt
 							senderDataModel := service.GetUserByTelegramID(db, app, m.Sender.ID)
-							usernameDataModel,_ := service.checkUserHaveUserName(db, app, channelModel.ID, senderDataModel.ID)
+							usernameDataModel, _ := service.checkUserHaveUserName(db, app, channelModel.ID, senderDataModel.ID)
 							sendMessage, err := bot.Send(user, config.LangConfig.GetString("GENERAL.FROM")+": "+channelModel.ChannelName+"\nBy: [User "+usernameDataModel.Username+"]\n------------------------------\n"+config.LangConfig.GetString("GENERAL.MESSAGE")+": "+m.Text, newSendOption)
 							if err == nil {
 								newChannelMessageID := strconv.Itoa(sendMessage.ID)
@@ -554,7 +554,7 @@ func (service *BotService) SendAnswerAndSaveDirectMessage(db *sql.DB, app *confi
 						options := new(tb.SendOptions)
 						markup := new(tb.ReplyMarkup)
 						userDataModel := service.GetUserByTelegramID(db, app, userIDInInt)
-						usernameModel,_ := service.checkUserHaveUserName(db, app, channelModel.ID, userDataModel.ID)
+						usernameModel, _ := service.checkUserHaveUserName(db, app, channelModel.ID, userDataModel.ID)
 						SendAnotherDM := tb.InlineButton{
 							Unique: config.LangConfig.GetString("STATE.ANSWER_TO_DM") + "_" + channelID + "_" + userID + "_" + newBotMessageID,
 							Text:   config.LangConfig.GetString("MESSAGES.ANOTHER_DIRECT_REPLY") + " [User " + usernameModel.Username + "]",
@@ -588,7 +588,7 @@ func (service *BotService) SendAnswerAndSaveDirectMessage(db *sql.DB, app *confi
 						newChannelModel := new(models.Channel)
 						if err := db.QueryRow("SELECT id,channelName,channelType from `channels` where `channelID`=?", channelID).Scan(&newChannelModel.ID, &newChannelModel.ChannelName, &newChannelModel.ChannelType); err == nil {
 							senderUserDataModel := service.GetUserByTelegramID(db, app, m.Sender.ID)
-							newUsernameModel,_ := service.checkUserHaveUserName(db, app, newChannelModel.ID, senderUserDataModel.ID)
+							newUsernameModel, _ := service.checkUserHaveUserName(db, app, newChannelModel.ID, senderUserDataModel.ID)
 							newReply := tb.InlineButton{
 								Unique: config.LangConfig.GetString("STATE.ANSWER_TO_DM") + "_" + channelID + "_" + senderID + "_" + newBotMessageID,
 								Text:   config.LangConfig.GetString("MESSAGES.DIRECT_REPLY") + " [User " + newUsernameModel.Username + "]",
@@ -604,7 +604,7 @@ func (service *BotService) SendAnswerAndSaveDirectMessage(db *sql.DB, app *confi
 							user := new(tb.User)
 							user.ID = userIDInInt
 							senderDataModel := service.GetUserByTelegramID(db, app, m.Sender.ID)
-							newUsernameDataModel,_ := service.checkUserHaveUserName(db, app, newChannelModel.ID, senderDataModel.ID)
+							newUsernameDataModel, _ := service.checkUserHaveUserName(db, app, newChannelModel.ID, senderDataModel.ID)
 							sendMessage, err := bot.Send(user, config.LangConfig.GetString("GENERAL.FROM")+": "+newChannelModel.ChannelName+"\nBy: [User "+newUsernameDataModel.Username+"]\n------------------------------\n"+config.LangConfig.GetString("GENERAL.MESSAGE")+": "+m.Text, newSendOption)
 							if err == nil {
 								newChannelMessageID := strconv.Itoa(sendMessage.ID)
@@ -631,9 +631,30 @@ func (service *BotService) GetUserCurrentActiveChannel(db *sql.DB, app *config.A
 	channelModel := new(models.Channel)
 	companyModel := new(models.Company)
 	channelSetting := new(models.ChannelSetting)
-	if err := db.QueryRow("SELECT ch.uniqueID,ch.id,ch.channelID,ch.channelName,ch.manualChannelName,ch.channelURL,ch.channelType,us.id,us.userID,cc.companyID,cse.joinVerify,cse.newMessageVerify,cse.replyVerify,cse.directVerify from `channels` as ch inner join `users_current_active_channel` as uc on ch.id=uc.channelID and uc.status='ACTIVE' inner join `users` as us on uc.userID=us.id and us.userID=? and us.`status`='ACTIVE' inner join companies_channels as cc on cc.channelID=ch.id left join channels_settings as cse on cse.channelID=ch.id", userID).Scan(&channelModel.UniqueID, &channelModel.ID, &channelModel.ChannelID, &channelModel.ChannelName, &channelModel.ManualChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &userModel.ID, &userModel.UserID, &companyModel.ID, &channelSetting.JoinVerify, &channelSetting.NewMessageVerify, &channelSetting.ReplyVerify, &channelSetting.DirectVerify); err != nil {
+	var joinVerify, newMessageVerify, replyVerify, directVerify int
+	if err := db.QueryRow("SELECT ch.uniqueID,ch.id,ch.channelID,ch.channelName,ch.manualChannelName,ch.channelURL,ch.channelType,us.id,us.userID,cc.companyID,cse.joinVerify,cse.newMessageVerify,cse.replyVerify,cse.directVerify from `channels` as ch inner join `users_current_active_channel` as uc on ch.id=uc.channelID and uc.status='ACTIVE' inner join `users` as us on uc.userID=us.id and us.userID=? and us.`status`='ACTIVE' inner join companies_channels as cc on cc.channelID=ch.id left join channels_settings as cse on cse.channelID=ch.id", userID).Scan(&channelModel.UniqueID, &channelModel.ID, &channelModel.ChannelID, &channelModel.ChannelName, &channelModel.ManualChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &userModel.ID, &userModel.UserID, &companyModel.ID, &joinVerify, &newMessageVerify, &replyVerify, &directVerify); err != nil {
 		log.Println(err)
 		return channelModel
+	}
+	if joinVerify == 0 {
+		channelSetting.JoinVerify = false
+	} else {
+		channelSetting.JoinVerify = true
+	}
+	if newMessageVerify == 0 {
+		channelSetting.NewMessageVerify = false
+	} else {
+		channelSetting.NewMessageVerify = true
+	}
+	if replyVerify == 0 {
+		channelSetting.ReplyVerify = false
+	} else {
+		channelSetting.ReplyVerify = true
+	}
+	if directVerify == 0 {
+		channelSetting.DirectVerify = false
+	} else {
+		channelSetting.DirectVerify = true
 	}
 	channelModel.User = userModel
 	channelModel.Company = companyModel
