@@ -157,7 +157,7 @@ func (service *BotService) SendReply(app *config.App, bot *tb.Bot, m *tb.Message
 		service.JoinFromGroup(db, app, bot, m, channelID)
 		channelModel := new(models.Channel)
 		messageModel := new(models.Message)
-		if err := db.QueryRow("SELECT ch.id,ch.channelName,me.message FROM `channels` as ch inner join messages as me on ch.id=me.channelID and me.botMessageID=? where ch.channelID=?", messageID, channelID).Scan(&channelModel.ID, &channelModel.ChannelName, &messageModel.Message); err != nil {
+		if err := db.QueryRow("SELECT ch.id,ch.channelName,me.message, me.messageType FROM `channels` as ch inner join messages as me on ch.id=me.channelID and me.botMessageID=? where ch.channelID=?", messageID, channelID).Scan(&channelModel.ID, &channelModel.ChannelName, &messageModel.Message, &messageModel.MessageType); err != nil {
 			log.Println(err)
 			return true
 		}
@@ -168,12 +168,30 @@ func (service *BotService) SendReply(app *config.App, bot *tb.Bot, m *tb.Message
 			return true
 		}
 		var maxLenOfString int
-		if len(messageModel.Message) < 60 {
-			maxLenOfString = len(messageModel.Message)
-		} else {
-			maxLenOfString = 60
+		if messageModel.MessageType == "TEXT" {
+			if len(messageModel.Message) < 60 {
+				maxLenOfString = len(messageModel.Message)
+			} else {
+				maxLenOfString = 60
+			}
+			_, err = bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_REPLY")+"'"+messageModel.Message[0:maxLenOfString]+"...' on "+channelModel.ChannelName)
+			if err != nil {
+				log.Println(err)
+				return true
+			}
 		}
-		_, err = bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_REPLY")+"'"+messageModel.Message[0:maxLenOfString]+"...' on "+channelModel.ChannelName)
+		file, err := bot.FileByID(messageModel.Message)
+		if err != nil {
+			log.Println(err)
+			return true
+		}
+		photoModel := new(tb.Photo)
+		switch messageModel.MessageType {
+		case "PHOTO":
+			photoModel.File = file
+			photoModel.Caption = config.LangConfig.GetString("MESSAGES.PLEASE_REPLY_MEDIA") + "on " + channelModel.ChannelName
+		}
+		_, err = bot.Send(m.Sender, photoModel)
 		if err != nil {
 			log.Println(err)
 			return true
@@ -232,7 +250,6 @@ func (service *BotService) SanedDM(app *config.App, bot *tb.Bot, m *tb.Message, 
 	}
 	return false
 }
-
 
 func (service *BotService) SanedAnswerDM(app *config.App, bot *tb.Bot, m *tb.Callback, request *Event) bool {
 	if strings.Contains(m.Data, request.Command) {

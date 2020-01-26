@@ -52,6 +52,7 @@ MESSAGES:
   CHANNEL_UNIQUE_ID_MESSAGE: "This is your channel unique ID, you can save it and remove this message:"
   COMPOSE_MESSAGE: "📝 New Anonymous Message 👻"
   PLEASE_REPLY: "Please send your reply to the message: "
+  PLEASE_REPLY_MEDIA: "Please send your reply to this media file "
   BAN_DIRECT: "You are attempting to Direct Message 📲 yourself. You cannot 🚫 do this. No message has been sent."
   PLEASE_SEND_YOUR_DIRECT: "Please send your direct message to the user: "
   REPLY: "↩️ Anonymous Reply All"
