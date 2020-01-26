@@ -284,12 +284,8 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USERNAME_IS_TAKEN"))
 		return true
 	}
-	userID, err := strconv.ParseInt(channelData[1], 10, 0)
-	if err != nil {
-		log.Println(err)
-		return true
-	}
-	insertCompanyRequest, err := db.Query("INSERT INTO `users_usernames` (`userID`,`channelID`,`username`,`createdAt`) VALUES(?,?,?,?)", userID, channelID, m.Text, app.CurrentTime)
+	userID := service.GetUserByTelegramID(db, app, m.Sender.ID)
+	insertCompanyRequest, err := db.Query("INSERT INTO `users_usernames` (`userID`,`channelID`,`username`,`createdAt`) VALUES(?,?,?,?)", userID.ID, channelID, m.Text, app.CurrentTime)
 	if err != nil {
 		log.Println(err)
 		return true
@@ -334,7 +330,7 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 	case "dm":
 		newDMMessage := new(tb.Message)
 		newDMMessage.Sender = m.Sender
-		newDMMessage.Text = config.LangConfig.GetString("COMMANDS.START_REPLY_DM") + channelModel.ChannelID + "_" + strconv.Itoa(m.Sender.ID) + "_" + channelData[3]
+		newDMMessage.Text = config.LangConfig.GetString("COMMANDS.START_REPLY_DM") + channelModel.ChannelID + "_" + channelData[1] + "_" + channelData[3]
 		return generalEventsHandler(app, bot, newDMMessage, &Event{
 			UserState:  config.LangConfig.GetString("STATE.REPLY_BY_DM"),
 			Command:    config.LangConfig.GetString("STATE.REPLY_BY_DM") + "_",

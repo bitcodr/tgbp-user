@@ -215,12 +215,14 @@ func (service *BotService) SanedDM(app *config.App, bot *tb.Bot, m *tb.Message, 
 		options.ParseMode = tb.ModeHTML
 		channel := service.GetChannelByTelegramID(db, app, channelID)
 		user := service.GetUserByTelegramID(db, app, m.Sender.ID)
-		usernamemodel, err := service.checkUserHaveUserName(db, app, channel.ID, user.ID)
+		_, err = service.checkUserHaveUserName(db, app, channel.ID, user.ID)
 		if err != nil {
-			SaveUserLastState(db, app, bot, "dm_"+strconv.FormatInt(lastState.User.ID, 10)+"_"+strconv.FormatInt(channel.ID, 10)+"_"+data[2], m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
+			SaveUserLastState(db, app, bot, "dm_"+data[1]+"_"+strconv.FormatInt(channel.ID, 10)+"_"+data[2], m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
 			bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USERNAME_MESSAGE"))
 			return true
 		}
+		userDtaModel := service.GetUserByTelegramID(db, app, directSenderID)
+		usernamemodel, _ := service.checkUserHaveUserName(db, app, channel.ID, userDtaModel.ID)
 		_, err = bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_SEND_YOUR_DIRECT")+"<b>"+usernamemodel.Username+"</b> "+config.LangConfig.GetString("GENERAL.FROM")+": <b>"+channel.ChannelName+"</b>", options)
 		if err != nil {
 			log.Println(err)
@@ -230,6 +232,7 @@ func (service *BotService) SanedDM(app *config.App, bot *tb.Bot, m *tb.Message, 
 	}
 	return false
 }
+
 
 func (service *BotService) SanedAnswerDM(app *config.App, bot *tb.Bot, m *tb.Callback, request *Event) bool {
 	if strings.Contains(m.Data, request.Command) {
@@ -262,12 +265,14 @@ func (service *BotService) SanedAnswerDM(app *config.App, bot *tb.Bot, m *tb.Cal
 		channelID := strings.TrimSpace(data[0])
 		channel := service.GetChannelByTelegramID(db, app, channelID)
 		user := service.GetUserByTelegramID(db, app, m.Sender.ID)
-		usernamemodel, err := service.checkUserHaveUserName(db, app, channel.ID, user.ID)
+		_, err = service.checkUserHaveUserName(db, app, channel.ID, user.ID)
 		if err != nil {
-			SaveUserLastState(db, app, bot, "dm_"+strconv.FormatInt(lastState.User.ID, 10)+"_"+strconv.FormatInt(channel.ID, 10)+"_"+data[2], m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
+			SaveUserLastState(db, app, bot, "dm_"+data[1]+"_"+strconv.FormatInt(channel.ID, 10)+"_"+data[2], m.Sender.ID, config.LangConfig.GetString("STATE.ADD_PSEUDONYM"))
 			bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USERNAME_MESSAGE"))
 			return true
 		}
+		userDtaModel := service.GetUserByTelegramID(db, app, directSenderID)
+		usernamemodel, _ := service.checkUserHaveUserName(db, app, channel.ID, userDtaModel.ID)
 		_, err = bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.PLEASE_SEND_YOUR_DIRECT")+"<b>"+usernamemodel.Username+"</b> "+config.LangConfig.GetString("GENERAL.FROM")+": <b>"+channel.ChannelName+"</b>", options)
 		if err != nil {
 			log.Println(err)
