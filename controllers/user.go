@@ -62,11 +62,12 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *tb.User, uniqueID string, userID int) (*models.Company, *models.Channel, bool) {
 	channelModel := new(models.Channel)
 	companyModel := new(models.Company)
+	channelSetting := new(models.ChannelSetting)
 	options := new(tb.SendOptions)
 	replyModel := new(tb.ReplyMarkup)
 	replyModel.ReplyKeyboardRemove = true
 	options.ReplyMarkup = replyModel
-	if err := db.QueryRow("SELECT ch.id,ch.channelName,ch.channelURL,ch.channelType,co.companyName,co.id from `channels` as ch inner join companies_channels as cc on ch.id=cc.channelID inner join companies as co on cc.companyID=co.id where ch.uniqueID=?", uniqueID).Scan(&channelModel.ID, &channelModel.ChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &companyModel.CompanyName, &companyModel.ID); err != nil {
+	if err := db.QueryRow("SELECT ch.id,ch.channelName,ch.channelURL,ch.channelType,co.companyName,co.id,IFNULL(cs.joinVerify,0) as joinVerify from `channels` as ch inner join companies_channels as cc on ch.id=cc.channelID inner join companies as co on cc.companyID=co.id inner join channels_settings as cs on cs.channelID=ch.id where ch.uniqueID=?", uniqueID).Scan(&channelModel.ID, &channelModel.ChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &companyModel.CompanyName, &companyModel.ID, &channelSetting.JoinVerify); err != nil {
 		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_COMPANY_TO_JOIN"), options)
 		return nil, nil, true
 	}
@@ -83,6 +84,10 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 	newReplyModel.ReplyKeyboardRemove = true
 	newOptions.ReplyMarkup = newReplyModel
 	userDataModel := new(models.User)
+	if !channelSetting.JoinVerify {
+		bot.Send(userModel, "You trying to join to the "+channelModel.ChannelType+" "+channelModel.ChannelName+" belongs to the company "+companyModel.CompanyName+", to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
+		return nil, nil, true
+	}
 	if err := db.QueryRow("SELECT us.id from `users` as us inner join users_channels as uc on us.id=uc.userID and uc.channelID=? and uc.status='ACTIVE' where us.userID=?", channelModel.ID, userID).Scan(&userDataModel.ID); err == nil {
 		bot.Send(userModel, "You have been registered in the "+channelModel.ChannelType+" "+channelModel.ChannelName+" belongs to the company "+companyModel.CompanyName+", to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
 		return nil, nil, true
