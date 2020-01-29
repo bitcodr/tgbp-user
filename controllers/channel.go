@@ -703,6 +703,8 @@ func (service *BotService) SendAnswerAndSaveDirectMessage(db *sql.DB, app *confi
 
 func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState, text string, userID int) bool {
 	companyName := strings.TrimPrefix(text, request.Command)
+	userModel := new(tb.User)
+	userModel.ID = userID
 	rows, err := db.Query("SELECT ch.channelType,ch.channelName,ch.publicURL from `channels` as ch inner join `companies_channels` as uc on ch.id=uc.channelID inner join companies as co on co.id=uc.companyID and co.companyName=?", companyName)
 	if err != nil {
 		log.Println(err)
@@ -732,11 +734,11 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 		hasResult = true
 	}
 	if !hasResult {
-		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
-		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY")+companyName)
+		SaveUserLastState(db, app, bot, "", userID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
+		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY")+companyName)
 		return true
 	}
-	SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.COMPANY_CHANNEL_SENT"))
+	SaveUserLastState(db, app, bot, "", userID, config.LangConfig.GetString("STATE.COMPANY_CHANNEL_SENT"))
 	inlineKeyboards := [][]tb.InlineButton{
 		inlineButtonsEven,
 		inlineButtonsOdd,
@@ -745,7 +747,7 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 	reply := new(tb.ReplyMarkup)
 	reply.InlineKeyboard = inlineKeyboards
 	options.ReplyMarkup = reply
-	bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THE_COMPANY_CHANNELS")+companyName+config.LangConfig.GetString("MESSAGES.GO_TO_COMPANY_CHANNEL_BY_CLICK"), options)
+	bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THE_COMPANY_CHANNELS")+companyName+config.LangConfig.GetString("MESSAGES.GO_TO_COMPANY_CHANNEL_BY_CLICK"), options)
 	return true
 }
 
