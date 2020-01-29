@@ -709,11 +709,11 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 		return true
 	}
 	defer rows.Close()
-	if !rows.Next() {
-		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
-		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY")+companyName)
-		return true
-	}
+	// if !rows.Next() {
+	// 	SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
+	// 	bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY")+companyName)
+	// 	return true
+	// }
 	inlineButtonsEven := []tb.InlineButton{}
 	inlineButtonsOdd := []tb.InlineButton{}
 	var index int
@@ -725,7 +725,7 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 		}
 		inlineButton := tb.InlineButton{
 			Text: channelModel.ChannelType + " " + channelModel.ChannelName,
-			URL:  channelModel.PublicURL,
+			Unique:  channelModel.PublicURL,
 		}
 		if index%2 == 0 {
 			inlineButtonsEven = append(inlineButtonsEven, inlineButton)
@@ -742,7 +742,6 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 	options := new(tb.SendOptions)
 	reply := new(tb.ReplyMarkup)
 	reply.InlineKeyboard = inlineKeyboards
-	reply.ReplyKeyboardRemove = true
 	options.ReplyMarkup = reply
 	bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THE_COMPANY_CHANNELS")+companyName+config.LangConfig.GetString("MESSAGES.GO_TO_COMPANY_CHANNEL_BY_CLICK"), options)
 	return true

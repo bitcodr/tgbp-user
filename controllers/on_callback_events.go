@@ -17,6 +17,8 @@ func onCallbackEvents(app *config.App, bot *tb.Bot) {
 			goto SanedAnswerDM
 		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.COMPOSE_MESSAGE")+"_"):
 			goto NewMessageGroupHandlerCallback
+		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.JOIN_TO_GROUP_CHANNEL")):
+			goto JoinUserToChannel
 		default:
 			bot.Send(c.Sender, "Your message "+c.Data+" is not being processed or sent to any individual, channel or group.")
 			goto END
@@ -42,6 +44,15 @@ func onCallbackEvents(app *config.App, bot *tb.Bot) {
 		}
 		goto END
 
+	JoinUserToChannel:
+		if inlineOnCallbackEventsHandler(app, bot, c, &Event{
+			UserState:  config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"),
+			Controller: "RegisterUserWithemail",
+		}) {
+			Init(app, bot, true)
+		}
+		goto END
+
 	END:
 	})
 }
@@ -49,5 +60,17 @@ func onCallbackEvents(app *config.App, bot *tb.Bot) {
 func onCallbackEventsHandler(app *config.App, bot *tb.Bot, c *tb.Callback, request *Event) bool {
 	var result bool
 	helpers.Invoke(new(BotService), &result, request.Controller, app, bot, c, request)
+	return result
+}
+
+func inlineOnCallbackEventsHandler(app *config.App, bot *tb.Bot, c *tb.Callback, request *Event) bool {
+	var result bool
+	db := app.DB()
+	defer db.Close()
+	lastState := GetUserLastState(db, app, bot, c.Message, c.Sender.ID)
+	switch {
+	case request.Controller == "RegisterUserWithemail":
+		helpers.Invoke(new(BotService), &result, request.Controller, db, app, bot, c.Message, request, lastState, strings.TrimSpace(c.Data), c.Sender.ID)
+	}
 	return result
 }
