@@ -705,14 +705,18 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 	companyName := strings.TrimPrefix(text, request.Command)
 	rows, err := db.Query("SELECT ch.channelType,ch.channelName,ch.publicURL from `channels` as ch inner join `companies_channels` as uc on ch.id=uc.channelID inner join companies as co on co.id=uc.companyID and co.companyName=?", companyName)
 	if err != nil {
-		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
-		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY"))
+		log.Println(err)
 		return true
 	}
 	defer rows.Close()
+	if !rows.Next() {
+		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY")+companyName)
+		return true
+	}
 	var inlineButtonsEven []tb.InlineButton
 	var inlineButtonsOdd []tb.InlineButton
-	var index *int
+	var index int
 	for rows.Next() {
 		channelModel := new(models.Channel)
 		if err := rows.Scan(&channelModel.ChannelType, &channelModel.ChannelName, &channelModel.PublicURL); err != nil {
@@ -723,12 +727,12 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 			Text: channelModel.ChannelType + " " + channelModel.ChannelName,
 			URL:  channelModel.PublicURL,
 		}
-		if *index%2 == 0 {
+		if index%2 == 0 {
 			inlineButtonsEven = append(inlineButtonsEven, inlineButton)
 		} else {
 			inlineButtonsEven = append(inlineButtonsOdd, inlineButton)
 		}
-		*index++
+		index++
 	}
 	SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.COMPANY_CHANNEL_SENT"))
 	inlineKeyboards := [][]tb.InlineButton{
