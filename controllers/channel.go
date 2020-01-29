@@ -709,14 +709,10 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 		return true
 	}
 	defer rows.Close()
-	// if !rows.Next() {
-	// 	SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
-	// 	bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY")+companyName)
-	// 	return true
-	// }
 	inlineButtonsEven := []tb.InlineButton{}
 	inlineButtonsOdd := []tb.InlineButton{}
 	var index int
+	var hasResult bool
 	for rows.Next() {
 		channelModel := new(models.Channel)
 		if err := rows.Scan(&channelModel.ChannelType, &channelModel.ChannelName, &channelModel.PublicURL); err != nil {
@@ -724,8 +720,8 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 			return true
 		}
 		inlineButton := tb.InlineButton{
-			Text: channelModel.ChannelType + " " + channelModel.ChannelName,
-			Unique:  channelModel.PublicURL,
+			Text:   channelModel.ChannelType + " " + channelModel.ChannelName,
+			Unique: channelModel.PublicURL,
 		}
 		if index%2 == 0 {
 			inlineButtonsEven = append(inlineButtonsEven, inlineButton)
@@ -733,6 +729,12 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 			inlineButtonsEven = append(inlineButtonsOdd, inlineButton)
 		}
 		index++
+		hasResult = true
+	}
+	if !hasResult {
+		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY")+companyName)
+		return true
 	}
 	SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.COMPANY_CHANNEL_SENT"))
 	inlineKeyboards := [][]tb.InlineButton{
