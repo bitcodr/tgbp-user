@@ -701,6 +701,49 @@ func (service *BotService) SendAnswerAndSaveDirectMessage(db *sql.DB, app *confi
 	return true
 }
 
+func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState, text string, userID int) bool {
+	companyName := strings.TrimPrefix(text, request.Command)
+	rows, err := db.Query("SELECT ch.channelType,ch.channelName,ch.publicURL from `channels` as ch inner join `companies_channels` as uc on ch.id=uc.channelID inner join companies as co on co.id=uc.companyID and co.companyName=?", companyName)
+	if err != nil {
+		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY"))
+		return true
+	}
+	defer rows.Close()
+	var inlineButtonsEven []tb.InlineButton
+	var inlineButtonsOdd []tb.InlineButton
+	var index *int
+	for rows.Next() {
+		channelModel := new(models.Channel)
+		if err := rows.Scan(&channelModel.ChannelType, &channelModel.ChannelName, &channelModel.PublicURL); err != nil {
+			log.Println(err)
+			return true
+		}
+		inlineButton := tb.InlineButton{
+			Text: channelModel.ChannelType + " " + channelModel.ChannelName,
+			URL:  channelModel.PublicURL,
+		}
+		if *index%2 == 0 {
+			inlineButtonsEven = append(inlineButtonsEven, inlineButton)
+		} else {
+			inlineButtonsEven = append(inlineButtonsOdd, inlineButton)
+		}
+		*index++
+	}
+	SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.COMPANY_CHANNEL_SENT"))
+	inlineKeyboards := [][]tb.InlineButton{
+		inlineButtonsEven,
+		inlineButtonsOdd,
+	}
+	options := new(tb.SendOptions)
+	reply := new(tb.ReplyMarkup)
+	reply.InlineKeyboard = inlineKeyboards
+	reply.ReplyKeyboardRemove = true
+	options.ReplyMarkup = reply
+	bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THE_COMPANY_CHANNELS")+companyName+config.LangConfig.GetString("MESSAGES.GO_TO_COMPANY_CHANNEL_BY_CLICK"), options)
+	return true
+}
+
 func (service *BotService) GetUserCurrentActiveChannel(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, userID int) *models.Channel {
 	userModel := new(models.User)
 	channelModel := new(models.Channel)

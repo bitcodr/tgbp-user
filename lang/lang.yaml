@@ -33,6 +33,7 @@ STATE:
   ADD_ANON_MESSAGE: add_anon_message
   HOME: home
   REGISTER_USER_WITH_EMAIL: register_user_with_email
+  JOIN_TO_OTHER_COMPANY_CHANNELS: join_to_other_company_channels
   NEW_MESSAGE_TO_GROUP: new_message_to_group
   CONFIRM_REGISTER_COMPANY: confirm_register_company_email_address
   REGISTER_USER_FOR_COMPANY: register_user_for_the_company
@@ -42,8 +43,11 @@ STATE:
   CANCEL_USER_REGISTRATION: cancel_user_registration_for_the_company
   USER_NOT_REGISTERED: user_not_registered
   JOIN_TO_GROUP_CHANNEL: "join_to_"
+  JOIN_TO_COMPANY: "join_to_company_"
   ADD_PSEUDONYM: "add_pseudonym"
   JOIN_COMPLETED: "join_completed"
+  No_CHANNEL_FOR_THE_COMPANY: "no_channel_for_company"
+  COMPANY_CHANNEL_SENT: "company_channel_sent"
 
 MESSAGES:
   DATA_MUST_NOT_BE_NULL: "final data must not be null"
@@ -100,6 +104,9 @@ MESSAGES:
   USER_NAME_IS_WRONG: "The username must be 4 character without any spaces, the first letter must be an emoji and the last 3 ones must be combination of letters and numbers like: 🌞5h3 or 🌞jd1, ..."
   YOUR_PSEUDONYM_ADDED_SUCCESFULLY: "Your pseudonym added successfully, "
   USER_WITH_THIS_EMAIL_EXIST: "User with this email address exist, register with another one"
+  THERE_IS_NO_CHANNEL_FOR_COMPANY: "There is no channels or groups exists for the company "
+  THE_COMPANY_CHANNELS: "You can go to the company "
+  GO_TO_COMPANY_CHANNEL_BY_CLICK: " channels or groups by clicking on one the below buttons"
 
 COMMANDS:
   ENABLE_CHAT: "/enable_anonymity_support"
@@ -108,3 +115,4 @@ COMMANDS:
   START_REPLY_DM: "/start reply_by_dm_to_user_on_group_"
   START_COMPOSE_IN_GROUP: "/start compose_message_in_group_"
   JOIN_TO_GROUP: "/start join_to_"
+  JOIN_TO_COMPANY: "/start join_to_company_"

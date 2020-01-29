@@ -5,9 +5,9 @@ type Company struct {
 	CreatedAt   string     `json:"createdAt"`
 	UpdatedAt   string     `json:"updatedAt"`
 	CompanyName string     `json:"companyName"`
+	PublicURL   string     `json:"publicURL"`
 	Channels    []*Channel `json:"channels"`
 }
-
 
 type CompanyEmailSuffixes struct {
 	ID        int64    `json:"id"`
@@ -17,8 +17,6 @@ type CompanyEmailSuffixes struct {
 	Suffix    string   `json:"suffix"`
 	Company   *Company `json:"company"`
 }
-
-
 
 type CompanyChannel struct {
 	ID        int64    `json:"id"`

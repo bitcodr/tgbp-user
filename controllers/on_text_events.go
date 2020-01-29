@@ -11,7 +11,6 @@ import (
 
 func onTextEvents(app *config.App, bot *tb.Bot) {
 
-
 	bot.Handle(tb.OnText, func(message *tb.Message) {
 		if !message.Private() {
 			return
@@ -32,6 +31,8 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			goto NewMessageGroupHandler
 		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.JOIN_TO_GROUP_CHANNEL")):
 			goto JoinUserToChannel
+		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.JOIN_TO_COMPANY")):
+			goto JoinUserToCompany
 		default:
 			goto CheckState
 		}
@@ -73,6 +74,16 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
 			UserState:  config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"),
 			Controller: "RegisterUserWithemail",
+		}) {
+			Init(app, bot, true)
+		}
+		goto END
+
+	JoinUserToCompany:
+		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
+			UserState:  config.LangConfig.GetString("STATE.JOIN_TO_OTHER_COMPANY_CHANNELS"),
+			Controller: "JoinToOtherCompanyChannels",
+			Command: config.LangConfig.GetString("COMMANDS.JOIN_TO_COMPANY"),
 		}) {
 			Init(app, bot, true)
 		}
@@ -200,7 +211,7 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 func inlineOnTextEventsHandler(app *config.App, bot *tb.Bot, message *tb.Message, db *sql.DB, lastState *models.UserLastState, request *Event) bool {
 	var result bool
 	switch {
-	case request.Controller == "RegisterUserWithemail":
+	case request.Controller == "RegisterUserWithemail" || request.Controller == "JoinToOtherCompanyChannels":
 		helpers.Invoke(new(BotService), &result, request.Controller, db, app, bot, message, request, lastState, strings.TrimSpace(message.Text), message.Sender.ID)
 	default:
 		helpers.Invoke(new(BotService), &result, request.Controller, db, app, bot, message, request, lastState)
