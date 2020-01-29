@@ -714,8 +714,8 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY")+companyName)
 		return true
 	}
-	var inlineButtonsEven []tb.InlineButton
-	var inlineButtonsOdd []tb.InlineButton
+	inlineButtonsEven := []tb.InlineButton{}
+	inlineButtonsOdd := []tb.InlineButton{}
 	var index int
 	for rows.Next() {
 		channelModel := new(models.Channel)
