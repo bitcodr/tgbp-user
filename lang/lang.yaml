@@ -43,7 +43,7 @@ STATE:
   CANCEL_USER_REGISTRATION: cancel_user_registration_for_the_company
   USER_NOT_REGISTERED: user_not_registered
   JOIN_TO_GROUP_CHANNEL: "join_to_"
-  JOIN_TO_COMPANY: "join_to_company_"
+  JOIN_TO_COMPANY: "company_join_to_"
   ADD_PSEUDONYM: "add_pseudonym"
   JOIN_COMPLETED: "join_completed"
   No_CHANNEL_FOR_THE_COMPANY: "no_channel_for_company"
@@ -115,4 +115,4 @@ COMMANDS:
   START_REPLY_DM: "/start reply_by_dm_to_user_on_group_"
   START_COMPOSE_IN_GROUP: "/start compose_message_in_group_"
   JOIN_TO_GROUP: "/start join_to_"
-  JOIN_TO_COMPANY: "/start join_to_company_"
+  JOIN_TO_COMPANY: "/start company_join_to_"
