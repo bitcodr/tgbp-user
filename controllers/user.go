@@ -25,7 +25,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 	replyModel := new(tb.ReplyMarkup)
 	replyModel.ReplyKeyboardRemove = true
 	options.ReplyMarkup = replyModel
-	if lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL") {
+	if  lastState != nil && lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL") {
 		uniqueID := lastState.Data
 		companyModel, channelModel, state := checkAndVerifyCompany(db, app, bot, userModel, uniqueID, userID)
 		if state {

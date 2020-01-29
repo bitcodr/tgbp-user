@@ -705,36 +705,35 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 	companyName := strings.TrimPrefix(text, request.Command)
 	userModel := new(tb.User)
 	userModel.ID = userID
-	rows, err := db.Query("SELECT ch.channelType,ch.channelName,ch.publicURL from `channels` as ch inner join `companies_channels` as uc on ch.id=uc.channelID inner join companies as co on co.id=uc.companyID and co.companyName=?", companyName)
+	rows, err := db.Query("SELECT ch.channelType,ch.channelName,ch.uniqueID from `channels` as ch inner join `companies_channels` as uc on ch.id=uc.channelID inner join companies as co on co.id=uc.companyID and co.companyName=?", companyName)
 	if err != nil {
 		log.Println(err)
 		return true
 	}
 	defer rows.Close()
-	inlineButtonsEven := []tb.InlineButton{}
-	inlineButtonsOdd := []tb.InlineButton{}
+	var inlineButtonsEven []tb.InlineButton
+	var inlineButtonsOdd []tb.InlineButton
 	var index int
 	var hasResult bool
 	for rows.Next() {
 		channelModel := new(models.Channel)
-		if err := rows.Scan(&channelModel.ChannelType, &channelModel.ChannelName, &channelModel.PublicURL); err != nil {
+		if err := rows.Scan(&channelModel.ChannelType, &channelModel.ChannelName, &channelModel.UniqueID); err != nil {
 			log.Println(err)
 			return true
 		}
 		inlineButton := tb.InlineButton{
 			Text:   channelModel.ChannelType + " " + channelModel.ChannelName,
-			Unique: channelModel.PublicURL,
+			Unique: config.LangConfig.GetString("COMMANDS.JOIN_TO_GROUP")+channelModel.UniqueID,
 		}
 		if index%2 == 0 {
 			inlineButtonsEven = append(inlineButtonsEven, inlineButton)
 		} else {
-			inlineButtonsEven = append(inlineButtonsOdd, inlineButton)
+			inlineButtonsOdd = append(inlineButtonsOdd, inlineButton)
 		}
-		index++
 		hasResult = true
+		index++
 	}
 	if !hasResult {
-		SaveUserLastState(db, app, bot, "", userID, config.LangConfig.GetString("STATE.No_CHANNEL_FOR_THE_COMPANY"))
 		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_CHANNEL_FOR_COMPANY")+companyName)
 		return true
 	}
@@ -746,8 +745,13 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 	options := new(tb.SendOptions)
 	reply := new(tb.ReplyMarkup)
 	reply.InlineKeyboard = inlineKeyboards
+	reply.ReplyKeyboardRemove = true
 	options.ReplyMarkup = reply
-	bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THE_COMPANY_CHANNELS")+companyName+config.LangConfig.GetString("MESSAGES.GO_TO_COMPANY_CHANNEL_BY_CLICK"), options)
+	_, err = bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THE_COMPANY_CHANNELS")+companyName+config.LangConfig.GetString("MESSAGES.GO_TO_COMPANY_CHANNEL_BY_CLICK"), options)
+	if err != nil {
+		log.Println(err)
+		return true
+	}
 	return true
 }
 

@@ -18,7 +18,8 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 
 		db := app.DB()
 		defer db.Close()
-		lastState := GetUserLastState(db, app, bot, message, message.Sender.ID)
+
+		var lastState *models.UserLastState
 
 		//check incoming text
 		incomingMessage := message.Text
@@ -34,6 +35,7 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.JOIN_TO_COMPANY")):
 			goto JoinUserToCompany
 		default:
+			lastState = GetUserLastState(db, app, bot, message, message.Sender.ID)
 			goto CheckState
 		}
 
@@ -71,7 +73,7 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		goto END
 
 	JoinUserToChannel:
-		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
+		if inlineOnTextEventsHandler(app, bot, message, db, nil, &Event{
 			UserState:  config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"),
 			Controller: "RegisterUserWithemail",
 		}) {
@@ -80,10 +82,10 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		goto END
 
 	JoinUserToCompany:
-		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
+		if inlineOnTextEventsHandler(app, bot, message, db, nil, &Event{
 			UserState:  config.LangConfig.GetString("STATE.JOIN_TO_OTHER_COMPANY_CHANNELS"),
 			Controller: "JoinToOtherCompanyChannels",
-			Command: config.LangConfig.GetString("COMMANDS.JOIN_TO_COMPANY"),
+			Command:    config.LangConfig.GetString("COMMANDS.JOIN_TO_COMPANY"),
 		}) {
 			Init(app, bot, true)
 		}
