@@ -35,7 +35,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.PLEASE_ENTER_VALID_EMAIL"), options)
 			return true
 		}
-		emails := []string{"yahoo.com", "hotmail.com", "outlook.com", "zoho.com", "icloud.com", "mail.com", "aol.com", "yandex.com"}
+		emails := []string{"hotmail.com", "outlook.com", "zoho.com", "icloud.com", "mail.com", "aol.com", "yandex.com"}
 		emailSuffix := strings.Split(text, "@")
 		if helpers.SortAndSearchInStrings(emails, emailSuffix[1]) {
 			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.NOT_ALLOWED_PUBLIC_EMAIL"), options)
