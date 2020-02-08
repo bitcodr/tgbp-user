@@ -3,17 +3,18 @@ package controllers
 import (
 	"database/sql"
 	"errors"
-	"github.com/amiraliio/tgbp-user/config"
-	"github.com/amiraliio/tgbp-user/helpers"
-	"github.com/amiraliio/tgbp-user/models"
-	emoji "github.com/tmdvs/Go-Emoji-Utils"
-	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
 	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/amiraliio/tgbp-user/config"
+	"github.com/amiraliio/tgbp-user/helpers"
+	"github.com/amiraliio/tgbp-user/models"
+	emoji "github.com/tmdvs/Go-Emoji-Utils"
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 //TODO add gmail.com yahoo to ban email address
@@ -33,6 +34,11 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 			return true
 		}
 		if !strings.Contains(text, "@") {
+			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.PLEASE_ENTER_VALID_EMAIL"), options)
+			return true
+		}
+		matched, _ := regexp.MatchString(`^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$`, text)
+		if !matched {
 			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.PLEASE_ENTER_VALID_EMAIL"), options)
 			return true
 		}
