@@ -25,10 +25,10 @@ func onMediaEvents(app *config.App, bot *tb.Bot) {
 		case lastState.State == config.LangConfig.GetString("STATE.ANSWER_TO_DM"):
 			goto SendAnswerAndSaveDirectMessage
 		case lastState.State == config.LangConfig.GetString("STATE.ADD_PSEUDONYM"):
-			bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
+			bot.Send(message.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
 			goto END
 		default:
-			bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+			bot.Send(message.Sender, "Your message is not being processed or sent to any individual, channel or group.")
 			goto END
 		}
 
