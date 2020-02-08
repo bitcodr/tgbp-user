@@ -25,8 +25,8 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 	replyModel := new(tb.ReplyMarkup)
 	replyModel.ReplyKeyboardRemove = true
 	options.ReplyMarkup = replyModel
-	options.ParseMode =  tb.ModeMarkdown
-	if  lastState != nil && lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL") {
+	options.ParseMode = tb.ModeMarkdown
+	if lastState != nil && lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL") {
 		uniqueID := lastState.Data
 		companyModel, channelModel, state := checkAndVerifyCompany(db, app, bot, userModel, uniqueID, userID)
 		if state {
@@ -276,10 +276,14 @@ func (service *BotService) SetUserUserName(db *sql.DB, app *config.App, bot *tb.
 		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
 		return true
 	}
+	if m.Text == "" {
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
+		return true
+	}
 	anotherUsernameLetters := emoji.RemoveAll(m.Text)
 	hasRightFormat, err := regexp.MatchString(`([A-Za-z]+[0-9]|[0-9]+[A-Za-z])[A-Za-z0-9]*`, anotherUsernameLetters)
 	if err != nil {
-		log.Println(err)
+		bot.Send(m.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
 		return true
 	}
 	if len(anotherUsernameLetters) != 3 || !hasRightFormat {
