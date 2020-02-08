@@ -19,9 +19,9 @@ func Init(app *config.App, bot *tb.Bot, state interface{}) {
 		return
 	}
 	onActionEvents(app, bot)
-	onMediaEvents(app, bot)
 	onTextEvents(app, bot)
 	onCallbackEvents(app, bot)
+	onMediaEvents(app, bot)
 }
 
 func generalEventsHandler(app *config.App, bot *tb.Bot, message *tb.Message, request *Event) bool {
