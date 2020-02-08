@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-//TODO add gmail.com to ban email address
+//TODO add gmail.com yahoo to ban email address
 
 func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState, text string, userID int) bool {
 	userModel := new(tb.User)
@@ -25,6 +25,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 	replyModel := new(tb.ReplyMarkup)
 	replyModel.ReplyKeyboardRemove = true
 	options.ReplyMarkup = replyModel
+	options.ParseMode =  tb.ModeMarkdown
 	if  lastState != nil && lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL") {
 		uniqueID := lastState.Data
 		companyModel, channelModel, state := checkAndVerifyCompany(db, app, bot, userModel, uniqueID, userID)
@@ -55,7 +56,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 		return true
 	}
 	SaveUserLastState(db, app, bot, uniqueID, userID, config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"))
-	bot.Send(userModel, "Please enter your email in the "+channelModel.ChannelType+" "+channelModel.ChannelName+" belongs to the company "+companyModel.CompanyName+" for verification", options)
+	bot.Send(userModel, "Please enter your email in the "+channelModel.ChannelType+" *"+channelModel.ChannelName+"* belongs to the company *"+companyModel.CompanyName+"* for verification", options)
 	return true
 }
 
@@ -83,17 +84,18 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 	newReplyModel.InlineKeyboard = replyKeys
 	newReplyModel.ReplyKeyboardRemove = true
 	newOptions.ReplyMarkup = newReplyModel
+	newOptions.ParseMode = tb.ModeMarkdown
 	userDataModel := new(models.User)
 	if !channelSetting.JoinVerify {
-		bot.Send(userModel, "You trying to join to the "+channelModel.ChannelType+" "+channelModel.ChannelName+" belongs to the company "+companyModel.CompanyName+", to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
+		bot.Send(userModel, "You trying to join to the "+channelModel.ChannelType+" *"+channelModel.ChannelName+"* belongs to the company *"+companyModel.CompanyName+"*, to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
 		return nil, nil, true
 	}
 	if err := db.QueryRow("SELECT us.id from `users` as us inner join users_channels as uc on us.id=uc.userID and uc.channelID=? and uc.status='ACTIVE' where us.userID=?", channelModel.ID, userID).Scan(&userDataModel.ID); err == nil {
-		bot.Send(userModel, "You have been registered in the "+channelModel.ChannelType+" "+channelModel.ChannelName+" belongs to the company "+companyModel.CompanyName+", to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
+		bot.Send(userModel, "You have been registered in the "+channelModel.ChannelType+" *"+channelModel.ChannelName+"* belongs to the company *"+companyModel.CompanyName+"*, to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
 		return nil, nil, true
 	}
 	if err := db.QueryRow("SELECT us.id from users as us inner join users_channels as uc on us.id=uc.userID and uc.status='ACTIVE' inner join companies_channels as cc on cc.channelID=uc.channelID and cc.companyID=? where us.userID=?", companyModel.ID, userID).Scan(&userDataModel.ID); err == nil {
-		bot.Send(userModel, "You have been registered in the one of channels or groups blongs to company "+companyModel.CompanyName+", and the verification is not required, to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
+		bot.Send(userModel, "You have been registered in the one of channels or groups blongs to company *"+companyModel.CompanyName+"*, and the verification is not required, to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
 		return nil, nil, true
 	}
 	return companyModel, channelModel, false
