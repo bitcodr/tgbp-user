@@ -75,7 +75,7 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 	replyModel := new(tb.ReplyMarkup)
 	replyModel.ReplyKeyboardRemove = true
 	options.ReplyMarkup = replyModel
-	if err := db.QueryRow("SELECT ch.id,ch.channelName,ch.channelID,ch.channelURL,ch.channelType,co.companyName,co.id,IFNULL(cs.joinVerify,0) as joinVerify from `channels` as ch inner join companies_channels as cc on ch.id=cc.channelID inner join companies as co on cc.companyID=co.id inner join channels_settings as cs on cs.channelID=ch.id where ch.uniqueID=?", uniqueID).Scan(&channelModel.ID, &channelModel.ChannelName,&channelModel.ChannelID, &channelModel.ChannelURL, &channelModel.ChannelType, &companyModel.CompanyName, &companyModel.ID, &channelSetting.JoinVerify); err != nil {
+	if err := db.QueryRow("SELECT ch.id,ch.channelName,ch.channelID,ch.channelURL,ch.channelType,co.companyName,co.id,IFNULL(cs.joinVerify,0) as joinVerify from `channels` as ch inner join companies_channels as cc on ch.id=cc.channelID inner join companies as co on cc.companyID=co.id inner join channels_settings as cs on cs.channelID=ch.id where ch.uniqueID=?", uniqueID).Scan(&channelModel.ID, &channelModel.ChannelName, &channelModel.ChannelID, &channelModel.ChannelURL, &channelModel.ChannelType, &companyModel.CompanyName, &companyModel.ID, &channelSetting.JoinVerify); err != nil {
 		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_COMPANY_TO_JOIN"), options)
 		return nil, nil, true
 	}
@@ -197,7 +197,7 @@ func (service *BotService) ConfirmRegisterUserForTheCompany(db *sql.DB, app *con
 			return true
 		}
 		defer insertCompanyRequest.Close()
-		go helpers.SendEmail(strconv.Itoa(randomeNumber), channelData[1])
+		go helpers.SendEmail(strconv.Itoa(randomeNumber), strings.TrimSpace(channelData[1]))
 		SaveUserLastState(db, app, bot, lastState.Data, m.Sender.ID, config.LangConfig.GetString("STATE.EMAIL_FOR_USER_REGISTRATION"))
 		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.ENTER_CODE_FROM_EMAIL"), optionsModel)
 	case config.LangConfig.GetString("GENERAL.NO_TEXT"):
