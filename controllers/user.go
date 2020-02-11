@@ -61,6 +61,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 	if state {
 		return true
 	}
+	service.JoinFromGroup(db, app, bot, m, channelModel.ChannelID)
 	SaveUserLastState(db, app, bot, uniqueID, userID, config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"))
 	bot.Send(userModel, "Please enter your email in the "+channelModel.ChannelType+" *"+channelModel.ChannelName+"* belongs to the company *"+companyModel.CompanyName+"* for verification", options)
 	return true
@@ -74,7 +75,7 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 	replyModel := new(tb.ReplyMarkup)
 	replyModel.ReplyKeyboardRemove = true
 	options.ReplyMarkup = replyModel
-	if err := db.QueryRow("SELECT ch.id,ch.channelName,ch.channelURL,ch.channelType,co.companyName,co.id,IFNULL(cs.joinVerify,0) as joinVerify from `channels` as ch inner join companies_channels as cc on ch.id=cc.channelID inner join companies as co on cc.companyID=co.id inner join channels_settings as cs on cs.channelID=ch.id where ch.uniqueID=?", uniqueID).Scan(&channelModel.ID, &channelModel.ChannelName, &channelModel.ChannelURL, &channelModel.ChannelType, &companyModel.CompanyName, &companyModel.ID, &channelSetting.JoinVerify); err != nil {
+	if err := db.QueryRow("SELECT ch.id,ch.channelName,ch.channelID,ch.channelURL,ch.channelType,co.companyName,co.id,IFNULL(cs.joinVerify,0) as joinVerify from `channels` as ch inner join companies_channels as cc on ch.id=cc.channelID inner join companies as co on cc.companyID=co.id inner join channels_settings as cs on cs.channelID=ch.id where ch.uniqueID=?", uniqueID).Scan(&channelModel.ID, &channelModel.ChannelName,&channelModel.ChannelID, &channelModel.ChannelURL, &channelModel.ChannelType, &companyModel.CompanyName, &companyModel.ID, &channelSetting.JoinVerify); err != nil {
 		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_COMPANY_TO_JOIN"), options)
 		return nil, nil, true
 	}
