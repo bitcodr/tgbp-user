@@ -2,12 +2,35 @@ package helpers
 
 import (
 	"crypto/tls"
-	"github.com/amiraliio/tgbp-user/config"
-	"gopkg.in/gomail.v2"
 	"log"
+
+	"github.com/amiraliio/tgbp-user/config"
+	ses "github.com/srajelli/ses-go"
+	"gopkg.in/gomail.v2"
 )
 
 func SendEmail(body, to string) {
+	switch config.AppConfig.GetString("EMAIL.DRIVER") {
+	case "simple":
+		simple(body, to)
+	case "aws":
+		aws(body, to)
+	}
+}
+
+func aws(body, to string) {
+	ses.SetConfiguration(config.AppConfig.GetString("EMAIL.USERNAME"), config.AppConfig.GetString("EMAIL.PASSWORD"), config.AppConfig.GetString("EMAIL.REGION"))
+
+	emailData := ses.Email{
+		To:      to,
+		From:    config.AppConfig.GetString("EMAIL.FROM"),
+		Text:    config.LangConfig.GetString("MESSAGES.YOU_ACTIVE_KEY") + " " + body + " " + config.LangConfig.GetString("MESSAGES.ACTIVE_EXPIRE_PEROID"),
+		Subject: config.AppConfig.GetString("APP.BOT_USERNAME") + config.LangConfig.GetString("MESSAGES.ACTIVE_KEY"),
+	}
+	ses.SendEmail(emailData)
+}
+
+func simple(body, to string) {
 	from := config.AppConfig.GetString("EMAIL.FROM")
 	pass := config.AppConfig.GetString("EMAIL.PASSWORD")
 	userName := config.AppConfig.GetString("EMAIL.USERNAME")
