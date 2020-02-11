@@ -26,6 +26,7 @@ func aws(body, to string) {
 		From:    config.AppConfig.GetString("EMAIL.FROM"),
 		Text:    config.LangConfig.GetString("MESSAGES.YOU_ACTIVE_KEY") + " " + body + " " + config.LangConfig.GetString("MESSAGES.ACTIVE_EXPIRE_PEROID"),
 		Subject: config.AppConfig.GetString("APP.BOT_USERNAME") + config.LangConfig.GetString("MESSAGES.ACTIVE_KEY"),
+		ReplyTo: config.AppConfig.GetString("EMAIL.FROM"),
 	}
 	ses.SendEmail(emailData)
 }
