@@ -11,9 +11,9 @@ import (
 
 func SendEmail(body, to string) {
 	switch config.AppConfig.GetString("EMAIL.DRIVER") {
-	case "simple":
+	case "SIMPLE":
 		simple(body, to)
-	case "aws":
+	case "AWS":
 		aws(body, to)
 	}
 }
