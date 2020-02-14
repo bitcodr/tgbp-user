@@ -8,7 +8,7 @@ import (
 )
 
 func (app *App) Bot() *tb.Bot {
-	if AppConfig.GetBool("APP.IS_WEBHOOK") {
+	if AppConfig.GetBool("APP.WEBHOOK_POLLER") {
 		return app.webhookPoller()
 	}
 	return app.longPoller()
