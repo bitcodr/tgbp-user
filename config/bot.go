@@ -1,26 +1,40 @@
 package config
 
 import (
-	tb "gopkg.in/tucnak/telebot.v2"
 	"log"
-	"strings"
 	"time"
+
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func (app *App) Bot() *tb.Bot {
-	poller := &tb.LongPoller{Timeout: 15 * time.Second}
-	spamProtected := tb.NewMiddlewarePoller(poller, func(upd *tb.Update) bool {
-		if upd.Message == nil {
-			return true
-		}
-		if strings.Contains(upd.Message.Text, "spam") {
-			return false
-		}
-		return true
-	})
+	if AppConfig.GetBool("APP.IS_WEBHOOK") {
+		return app.webhookPoller()
+	}
+	return app.longPoller()
+}
+
+func (app *App) webhookPoller() *tb.Bot {
+	webhookEndpoint := new(tb.WebhookEndpoint)
+	webhookEndpoint.PublicURL = AppConfig.GetString("APP.BOT_WEBHOOK_PUBLIC_URL")
+	poller := new(tb.Webhook)
+	poller.Listen = AppConfig.GetString("APP.BOT_WEBHOOK_PORT")
+	poller.Endpoint = webhookEndpoint
 	bot, err := tb.NewBot(tb.Settings{
 		Token:  app.BotToken,
-		Poller: spamProtected,
+		Poller: poller,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return bot
+}
+
+func (app *App) longPoller() *tb.Bot {
+	poller := &tb.LongPoller{Timeout: 15 * time.Second}
+	bot, err := tb.NewBot(tb.Settings{
+		Token:  app.BotToken,
+		Poller: poller,
 	})
 	if err != nil {
 		log.Fatalln(err)
