@@ -115,7 +115,7 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 		case lastState.State == config.LangConfig.GetString("STATE.ADD_PSEUDONYM"):
 			goto SetUserUserName
 		default:
-			bot.Send(message.Sender, "Your message "+message.Text+" is not being processed or sent to any individual, channel or group.")
+			bot.Send(message.Sender, "Your message "+message.Text+" is not being processed or sent to any individual, channel or group, Please try again.")
 			goto END
 		}
 

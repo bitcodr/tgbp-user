@@ -20,7 +20,7 @@ func onCallbackEvents(app *config.App, bot *tb.Bot) {
 		case strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.JOIN_TO_GROUP_CHANNEL")):
 			goto JoinUserToChannel
 		default:
-			bot.Send(c.Sender, "Your message "+c.Data+" is not being processed or sent to any individual, channel or group.")
+			bot.Send(c.Sender, "Your message "+c.Data+" is not being processed or sent to any individual, channel or group, Please try again.")
 			goto END
 		}
 

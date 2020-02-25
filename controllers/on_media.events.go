@@ -28,7 +28,7 @@ func onMediaEvents(app *config.App, bot *tb.Bot) {
 			bot.Send(message.Sender, config.LangConfig.GetString("MESSAGES.USER_NAME_IS_WRONG"))
 			goto END
 		default:
-			bot.Send(message.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+			bot.Send(message.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 			goto END
 		}
 
@@ -78,47 +78,47 @@ func onMediaEvents(app *config.App, bot *tb.Bot) {
 	})
 
 	bot.Handle(tb.OnSticker, func(m *tb.Message) {
-		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 		return
 	})
 
 	bot.Handle(tb.OnDocument, func(m *tb.Message) {
-		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 		return
 	})
 
 	bot.Handle(tb.OnVenue, func(m *tb.Message) {
-		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 		return
 	})
 
 	bot.Handle(tb.OnVideo, func(m *tb.Message) {
-		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 		return
 	})
 
 	bot.Handle(tb.OnAudio, func(m *tb.Message) {
-		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 		return
 	})
 
 	bot.Handle(tb.OnLocation, func(m *tb.Message) {
-		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 		return
 	})
 
 	bot.Handle(tb.OnContact, func(m *tb.Message) {
-		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 		return
 	})
 
 	bot.Handle(tb.OnVideoNote, func(m *tb.Message) {
-		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 		return
 	})
 
 	bot.Handle(tb.OnVoice, func(m *tb.Message) {
-		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group.")
+		bot.Send(m.Sender, "Your message is not being processed or sent to any individual, channel or group, Please try again.")
 		return
 	})
 

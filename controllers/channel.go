@@ -99,7 +99,8 @@ func (service *BotService) RegisterChannel(app *config.App, bot *tb.Bot, m *tb.M
 				}
 				sendOptionModel := new(tb.SendOptions)
 				sendOptionModel.ParseMode = tb.ModeHTML
-				_, err = bot.Send(m.Chat, config.LangConfig.GetString("MESSAGES.CHANNEL_UNIQUE_ID_MESSAGE")+" <code> "+uniqueID+" </code>", sendOptionModel)
+				_, err = bot.Send(m.Chat, config.LangConfig.GetString("MESSAGES.CHANNEL_UNIQUE_ID_MESSAGE")+
+` <code> `+uniqueID+` </code>`, sendOptionModel)
 				if err != nil {
 					log.Println(err)
 					return true
