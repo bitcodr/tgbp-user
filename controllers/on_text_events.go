@@ -104,8 +104,6 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			goto SendAndSaveDirectMessage
 		case lastState.State == config.LangConfig.GetString("STATE.ANSWER_TO_DM") || strings.Contains(incomingMessage, config.LangConfig.GetString("STATE.ANSWER_TO_DM")+"_"):
 			goto SendAnswerAndSaveDirectMessage
-		case lastState.State == config.LangConfig.GetString("STATE.CONFIRM_REGISTER_COMPANY"):
-			goto ConfirmRegisterCompanyRequest
 		case lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"):
 			goto RegisterUserWithemail
 		case lastState.State == config.LangConfig.GetString("STATE.REGISTER_USER_FOR_COMPANY"):
@@ -165,15 +163,6 @@ func onTextEvents(app *config.App, bot *tb.Bot) {
 			UserState:  config.LangConfig.GetString("STATE.ANSWER_TO_DM"),
 			Command:    config.LangConfig.GetString("STATE.ANSWER_TO_DM") + "_",
 			Controller: "SendAnswerAndSaveDirectMessage",
-		}) {
-			Init(app, bot, true)
-		}
-		goto END
-
-	ConfirmRegisterCompanyRequest:
-		if inlineOnTextEventsHandler(app, bot, message, db, lastState, &Event{
-			UserState:  config.LangConfig.GetString("STATE.CONFIRM_REGISTER_COMPANY"),
-			Controller: "ConfirmRegisterCompanyRequest",
 		}) {
 			Init(app, bot, true)
 		}

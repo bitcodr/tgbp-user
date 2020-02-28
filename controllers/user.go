@@ -138,30 +138,6 @@ func (service *BotService) checkTheCompanyEmailSuffixExist(app *config.App, bot 
 	bot.Send(userModel, config.LangConfig.GetString("MESSAGES.CONFIRM_REGISTER_TO_CHANNEL")+channelModel.ChannelType+" "+channelModel.ChannelName+config.LangConfig.GetString("MESSAGES.BLONGS_TO_COMPANY")+companyModel.CompanyName+"?", options)
 }
 
-func (service *BotService) ConfirmRegisterCompanyRequest(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState) bool {
-	userModel := new(tb.User)
-	userModel.ID = m.Sender.ID
-	optionsModel := new(tb.SendOptions)
-	replyNewModel := new(tb.ReplyMarkup)
-	replyNewModel.ReplyKeyboardRemove = true
-	optionsModel.ReplyMarkup = replyNewModel
-	switch m.Text {
-	case config.LangConfig.GetString("GENERAL.YES_TEXT"):
-		insertCompanyRequest, err := db.Query("INSERT INTO `companies_join_request` (`userID`,`emailSuffix`,`createdAt`) VALUES('" + strconv.FormatInt(lastState.UserID, 10) + "','" + lastState.Data + "','" + app.CurrentTime + "')")
-		if err != nil {
-			log.Println(err)
-			return true
-		}
-		defer insertCompanyRequest.Close()
-		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.JOIN_REQUEST_ADDED"))
-		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.SEND_REQUEST_TO_ADMIN"), optionsModel)
-	case config.LangConfig.GetString("GENERAL.NO_TEXT"):
-		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.JOIN_REQUEST_DISMISSED"))
-		bot.Send(userModel, "Your registration proccess cancelled", optionsModel)
-	}
-	return true
-}
-
 func (service *BotService) ConfirmRegisterUserForTheCompany(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState) bool {
 	userModel := new(tb.User)
 	userModel.ID = m.Sender.ID
