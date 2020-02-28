@@ -53,7 +53,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.USER_WITH_THIS_EMAIL_EXIST"))
 			return true
 		}
-		service.checkTheCompanyEmailSuffixExist(app, bot, text, "@"+emailSuffix[1], db, userModel, channelModel, companyModel)
+		service.checkTheCompanyEmailSuffixExist(app, bot, text, "@"+emailSuffix[1], db, userModel, channelModel, companyModel, userDataModel.ID)
 		return true
 	}
 	uniqueID := strings.TrimPrefix(text, config.LangConfig.GetString("COMMANDS.JOIN_TO_GROUP"))
@@ -110,79 +110,33 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 	return companyModel, channelModel, false
 }
 
-func (service *BotService) checkTheCompanyEmailSuffixExist(app *config.App, bot *tb.Bot, email, emailSuffix string, db *sql.DB, userModel *tb.User, channelModel *models.Channel, companyModel *models.Company) {
-	options := new(tb.SendOptions)
-	yesBTN := tb.ReplyButton{
-		Text: config.LangConfig.GetString("GENERAL.YES_TEXT"),
-	}
-	noBTN := tb.ReplyButton{
-		Text: config.LangConfig.GetString("GENERAL.NO_TEXT"),
-	}
-	replyKeys := [][]tb.ReplyButton{
-		[]tb.ReplyButton{yesBTN, noBTN},
-	}
-	replyModel := new(tb.ReplyMarkup)
-	replyModel.ReplyKeyboard = replyKeys
-	options.ReplyMarkup = replyModel
-	companiesSuffixesModel := new(models.CompanyEmailSuffixes)
-	if err := db.QueryRow("SELECT id from `companies_email_suffixes` where suffix=? and companyID=? limit 1", emailSuffix, companyModel.ID).Scan(&companiesSuffixesModel.ID); err != nil {
-		SaveUserLastState(db, app, bot, emailSuffix, userModel.ID, config.LangConfig.GetString("STATE.CONFIRM_REGISTER_COMPANY"))
-		optionsModel := new(tb.SendOptions)
-		replyNewModel := new(tb.ReplyMarkup)
-		replyNewModel.ReplyKeyboardRemove = true
-		optionsModel.ReplyMarkup = replyNewModel
-		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.COMPANY_WITH_THE_EMAIL_NOT_EXIST"), optionsModel)
-		return
-	}
-	SaveUserLastState(db, app, bot, strconv.FormatInt(channelModel.ID, 10)+"_"+email, userModel.ID, config.LangConfig.GetString("STATE.REGISTER_USER_FOR_COMPANY"))
-	bot.Send(userModel, config.LangConfig.GetString("MESSAGES.CONFIRM_REGISTER_TO_CHANNEL")+channelModel.ChannelType+" "+channelModel.ChannelName+config.LangConfig.GetString("MESSAGES.BLONGS_TO_COMPANY")+companyModel.CompanyName+"?", options)
-}
-
-func (service *BotService) ConfirmRegisterUserForTheCompany(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState) bool {
-	userModel := new(tb.User)
-	userModel.ID = m.Sender.ID
+func (service *BotService) checkTheCompanyEmailSuffixExist(app *config.App, bot *tb.Bot, email, emailSuffix string, db *sql.DB, userModel *tb.User, channelModel *models.Channel, companyModel *models.Company, userID int64) {
 	optionsModel := new(tb.SendOptions)
 	replyNewModel := new(tb.ReplyMarkup)
 	replyNewModel.ReplyKeyboardRemove = true
 	optionsModel.ReplyMarkup = replyNewModel
-	switch m.Text {
-	case config.LangConfig.GetString("GENERAL.YES_TEXT"):
-		if !strings.Contains(lastState.Data, "_") {
-			log.Println(config.LangConfig.GetString("MESSAGES.STRING_MUST_BE_2_PART"))
-			return true
-		}
-		channelData := strings.Split(lastState.Data, "_")
-		if len(channelData) != 2 {
-			log.Println(config.LangConfig.GetString("MESSAGES.LENGTH_OF_CHANNEL_DATA_MUST_BE_2"))
-			return true
-		}
-		userDBModel := new(models.User)
-		channelModel := new(models.Channel)
-		if err := db.QueryRow("SELECT us.id,ch.channelType FROM `users` as us inner join `users_channels` as uc on us.id=uc.userID and uc.channelID=? and uc.status='ACTIVE' inner join `channels` as ch on uc.channelID=ch.id where us.userID=?", channelData[0], m.Sender.ID).Scan(&userDBModel.ID, &channelModel.ChannelType); err == nil {
-			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.REGISTERED_IN_CHANNEL")+channelModel.ChannelType, optionsModel)
-			return true
-		}
-		rand.Seed(time.Now().UnixNano())
-		randomeNumber := rand.Intn(100000)
-		hashedRandomNumber, err := helpers.HashPassword(strconv.Itoa(randomeNumber))
-		if err != nil {
-			log.Println(err)
-			return true
-		}
-		insertCompanyRequest, err := db.Query("INSERT INTO `users_activation_key` (`userID`,`activeKey`,`createdAt`) VALUES('" + strconv.FormatInt(lastState.UserID, 10) + "','" + hashedRandomNumber + "','" + app.CurrentTime + "')")
-		if err != nil {
-			log.Println(err)
-			return true
-		}
-		defer insertCompanyRequest.Close()
-		go helpers.SendEmail(strconv.Itoa(randomeNumber), strings.TrimSpace(channelData[1]))
-		SaveUserLastState(db, app, bot, lastState.Data, m.Sender.ID, config.LangConfig.GetString("STATE.EMAIL_FOR_USER_REGISTRATION"))
-		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.ENTER_CODE_FROM_EMAIL"), optionsModel)
-	case config.LangConfig.GetString("GENERAL.NO_TEXT"):
-		SaveUserLastState(db, app, bot, "", m.Sender.ID, config.LangConfig.GetString("STATE.CANCEL_USER_REGISTRATION"))
-		bot.Send(userModel, "Your registration proccess cancelled", optionsModel)
+	companiesSuffixesModel := new(models.CompanyEmailSuffixes)
+	if err := db.QueryRow("SELECT id from `companies_email_suffixes` where suffix=? and companyID=? limit 1", emailSuffix, companyModel.ID).Scan(&companiesSuffixesModel.ID); err != nil {
+		SaveUserLastState(db, app, bot, emailSuffix, userModel.ID, config.LangConfig.GetString("STATE.CONFIRM_REGISTER_COMPANY"))
+		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.COMPANY_WITH_THE_EMAIL_NOT_EXIST"), optionsModel)
+		return
 	}
-	return true
+	rand.Seed(time.Now().UnixNano())
+	randomeNumber := rand.Intn(100000)
+	hashedRandomNumber, err := helpers.HashPassword(strconv.Itoa(randomeNumber))
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	insertCompanyRequest, err := db.Query("INSERT INTO `users_activation_key` (`userID`,`activeKey`,`createdAt`) VALUES(?,?,?)", userID, hashedRandomNumber, app.CurrentTime)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer insertCompanyRequest.Close()
+	go helpers.SendEmail(strconv.Itoa(randomeNumber), strings.TrimSpace(email))
+	SaveUserLastState(db, app, bot, strconv.FormatInt(channelModel.ID, 10)+"_"+email, userModel.ID, config.LangConfig.GetString("STATE.EMAIL_FOR_USER_REGISTRATION"))
+	bot.Send(userModel, config.LangConfig.GetString("MESSAGES.ENTER_CODE_FROM_EMAIL"), optionsModel)
 }
 
 func (service *BotService) RegisterUserWithEmailAndCode(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState) bool {
