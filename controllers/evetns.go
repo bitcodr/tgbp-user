@@ -23,11 +23,16 @@ func Init(app *config.App, bot *tb.Bot, state interface{}) {
 	onCallbackEvents(app, bot)
 	onMediaEvents(app, bot)
 
-
 }
 
 func generalEventsHandler(app *config.App, bot *tb.Bot, message *tb.Message, request *Event) bool {
 	var result bool
 	helpers.Invoke(new(BotService), &result, request.Controller, app, bot, message, request)
+	return result
+}
+
+func groupMigrationHandler(app *config.App, bot *tb.Bot, from, to int64, request *Event) bool {
+	var result bool
+	helpers.Invoke(new(BotService), &result, request.Controller, app, bot, from, to, request)
 	return result
 }

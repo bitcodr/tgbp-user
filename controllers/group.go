@@ -305,6 +305,17 @@ func (service *BotService) UpdateGroupTitle(app *config.App, bot *tb.Bot, m *tb.
 	return true
 }
 
+func (service *BotService) UpdateGroupID(app *config.App, bot *tb.Bot, from, to int64, request *Event) bool {
+	db := app.DB()
+	defer db.Close()
+	_, err := db.Query("update channels set channelID=? where channelID=?", to, from)
+	if err != nil {
+		log.Println(err)
+		return true
+	}
+	return true
+}
+
 func (service *BotService) CheckIfBotIsAdmin(app *config.App, bot *tb.Bot, m *tb.Message, db *sql.DB, request *Event) {
 	ids := strings.TrimPrefix(m.Text, request.Command1)
 	var channelID string

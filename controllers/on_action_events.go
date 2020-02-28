@@ -50,4 +50,15 @@ func onActionEvents(app *config.App, bot *tb.Bot) {
 		}
 	})
 
+
+	bot.Handle(tb.OnMigration, func(from, to int64) {
+		if groupMigrationHandler(app, bot, from, to, &Event{
+			Event:      tb.OnMigration,
+			UserState:  config.LangConfig.GetString("STATE.UPDATE_GROUP_ID"),
+			Controller: "UpdateGroupID",
+		}) {
+			Init(app, bot, true)
+		}
+	})
+
 }

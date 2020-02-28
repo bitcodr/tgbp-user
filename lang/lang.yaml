@@ -30,6 +30,7 @@ STATE:
   REGISTER_CHANNEL: register_channel
   REGISTER_GROUP: register_group
   UPDATE_GROUP_TITLE: updateGrouptitle
+  UPDATE_GROUP_ID: updateGroupID
   ADD_ANON_MESSAGE: add_anon_message
   HOME: home
   REGISTER_USER_WITH_EMAIL: register_user_with_email
