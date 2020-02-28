@@ -289,6 +289,14 @@ func (service *BotService) UpdateGroupTitle(app *config.App, bot *tb.Bot, m *tb.
 	if m.Sender != nil {
 		SaveUserLastState(db, app, bot, m.Text, m.Sender.ID, request.UserState)
 	}
+	if m.FromChannel() {
+		_, err := db.Query("update channels set channelName=? where channelID=?", m.Chat.Title, m.Chat.ID)
+		if err != nil {
+			log.Println(err)
+			return true
+		}
+		return true
+	}
 	_, err := db.Query("update channels set channelName=? where channelID=?", m.NewGroupTitle, m.Chat.ID)
 	if err != nil {
 		log.Println(err)

@@ -116,3 +116,4 @@ COMMANDS:
   START_COMPOSE_IN_GROUP: "/start compose_message_in_group_"
   JOIN_TO_GROUP: "/start join_to_"
   JOIN_TO_COMPANY: "/start join_company_"
+  UPDATE_CHANNEL_TITLE: "/update_title"

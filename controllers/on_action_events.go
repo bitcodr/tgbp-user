@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/amiraliio/tgbp-user/config"
 	tb "gopkg.in/tucnak/telebot.v2"
+	"strings"
 )
 
 func onActionEvents(app *config.App, bot *tb.Bot) {
@@ -16,6 +17,17 @@ func onActionEvents(app *config.App, bot *tb.Bot) {
 		}) {
 			Init(app, bot, true)
 		}
+
+		if strings.Contains(message.Text, config.LangConfig.GetString("STATE.UPDATE_CHANNEL_TITLE")) {
+			if generalEventsHandler(app, bot, message, &Event{
+				Event:      tb.OnNewGroupTitle,
+				UserState:  config.LangConfig.GetString("STATE.UPDATE_GROUP_TITLE"),
+				Controller: "UpdateGroupTitle",
+			}) {
+				Init(app, bot, true)
+			}
+		}
+
 	})
 
 	bot.Handle(tb.OnAddedToGroup, func(message *tb.Message) {
