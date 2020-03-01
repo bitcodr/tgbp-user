@@ -53,7 +53,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.USER_WITH_THIS_EMAIL_EXIST"))
 			return true
 		}
-		service.checkTheCompanyEmailSuffixExist(app, bot, text, "@"+emailSuffix[1], db, userModel, channelModel, companyModel, userDataModel.ID)
+		service.checkTheCompanyEmailSuffixExist(app, bot, text, "@"+emailSuffix[1], db, userModel, channelModel, companyModel, userID)
 		return true
 	}
 	uniqueID := strings.TrimPrefix(text, config.LangConfig.GetString("COMMANDS.JOIN_TO_GROUP"))
@@ -110,7 +110,7 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 	return companyModel, channelModel, false
 }
 
-func (service *BotService) checkTheCompanyEmailSuffixExist(app *config.App, bot *tb.Bot, email, emailSuffix string, db *sql.DB, userModel *tb.User, channelModel *models.Channel, companyModel *models.Company, userID int64) {
+func (service *BotService) checkTheCompanyEmailSuffixExist(app *config.App, bot *tb.Bot, email, emailSuffix string, db *sql.DB, userModel *tb.User, channelModel *models.Channel, companyModel *models.Company, userID int) {
 	optionsModel := new(tb.SendOptions)
 	replyNewModel := new(tb.ReplyMarkup)
 	replyNewModel.ReplyKeyboardRemove = true
