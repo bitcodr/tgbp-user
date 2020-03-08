@@ -77,7 +77,7 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 	replyModel := new(tb.ReplyMarkup)
 	replyModel.ReplyKeyboardRemove = true
 	options.ReplyMarkup = replyModel
-	if err := db.QueryRow("SELECT ch.id,ch.channelName,ch.channelID,ch.channelURL,ch.channelType,co.companyName,co.id,IFNULL(cs.joinVerify,0) as joinVerify,IFNULL(cs.newMessageVerify,0) as newMessageVerify,IFNULL(cs.replyVerify,0) as replyVerify, IFNULL(cs.directVerify,0) as directVerify from `channels` as ch inner join companies_channels as cc on ch.id=cc.channelID inner join companies as co on cc.companyID=co.id inner join channels_settings as cs on cs.channelID=ch.id where ch.uniqueID=?", uniqueID).Scan(&channelModel.ID, &channelModel.ChannelName, &channelModel.ChannelID, &channelModel.ChannelURL, &channelModel.ChannelType, &companyModel.CompanyName, &companyModel.ID, &channelSetting.JoinVerify,&channelSetting.NewMessageVerify, &channelSetting.ReplyVerify, &channelSetting.DirectVerify ); err != nil {
+	if err := db.QueryRow("SELECT ch.id,ch.channelName,ch.channelID,ch.channelURL,ch.channelType,co.companyName,co.id,IFNULL(cs.joinVerify,0) as joinVerify,IFNULL(cs.newMessageVerify,0) as newMessageVerify,IFNULL(cs.replyVerify,0) as replyVerify, IFNULL(cs.directVerify,0) as directVerify from `channels` as ch inner join companies_channels as cc on ch.id=cc.channelID inner join companies as co on cc.companyID=co.id inner join channels_settings as cs on cs.channelID=ch.id where ch.uniqueID=?", uniqueID).Scan(&channelModel.ID, &channelModel.ChannelName, &channelModel.ChannelID, &channelModel.ChannelURL, &channelModel.ChannelType, &companyModel.CompanyName, &companyModel.ID, &channelSetting.JoinVerify, &channelSetting.NewMessageVerify, &channelSetting.ReplyVerify, &channelSetting.DirectVerify); err != nil {
 		bot.Send(userModel, config.LangConfig.GetString("MESSAGES.THERE_IS_NO_COMPANY_TO_JOIN"), options)
 		return nil, nil, true
 	}
@@ -357,7 +357,12 @@ func (service *BotService) CheckUserRegisteredOrNot(db *sql.DB, app *config.App,
 				replyModel := new(tb.ReplyMarkup)
 				replyModel.ReplyKeyboardRemove = true
 				options.ReplyMarkup = replyModel
-				bot.Send(m.Sender, "You should first verify your account, Please enter your email in the "+channel.ChannelType+" "+channel.ChannelName+" belongs to the company "+channel.Company.CompanyName+" for verification", options)
+				options.ParseMode = tb.ModeMarkdown
+				bot.Send(m.Sender, "You should first verify your account, Please enter your email I'd to register for "+
+
+					channel.Company.CompanyName+
+
+					channel.ChannelType+channel.ChannelName, options)
 				return true
 			}
 		}
