@@ -93,7 +93,7 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 	newOptions.ReplyMarkup = newReplyModel
 	newOptions.ParseMode = tb.ModeMarkdown
 	userDataModel := new(models.User)
-	if !channelSetting.JoinVerify &&  !channelSetting.DirectVerify && !channelSetting.NewMessageVerify && !channelSetting.ReplyVerify {
+	if (!channelSetting.JoinVerify) || (!channelSetting.JoinVerify &&  !channelSetting.DirectVerify && !channelSetting.NewMessageVerify && !channelSetting.ReplyVerify) {
 		bot.Send(userModel, "You trying to join to the "+channelModel.ChannelType+" *"+channelModel.ChannelName+"* belongs to the company *"+companyModel.CompanyName+"*, to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
 		return nil, nil, true
 	}
