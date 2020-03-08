@@ -93,10 +93,10 @@ func checkAndVerifyCompany(db *sql.DB, app *config.App, bot *tb.Bot, userModel *
 	newOptions.ReplyMarkup = newReplyModel
 	newOptions.ParseMode = tb.ModeMarkdown
 	userDataModel := new(models.User)
-	// if !channelSetting.JoinVerify {
-	// 	bot.Send(userModel, "You trying to join to the "+channelModel.ChannelType+" *"+channelModel.ChannelName+"* belongs to the company *"+companyModel.CompanyName+"*, to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
-	// 	return nil, nil, true
-	// }
+	if !channelSetting.JoinVerify &&  !channelSetting.DirectVerify && !channelSetting.NewMessageVerify && !channelSetting.ReplyVerify {
+		bot.Send(userModel, "You trying to join to the "+channelModel.ChannelType+" *"+channelModel.ChannelName+"* belongs to the company *"+companyModel.CompanyName+"*, to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
+		return nil, nil, true
+	}
 	if err := db.QueryRow("SELECT us.id from `users` as us inner join users_channels as uc on us.id=uc.userID and uc.channelID=? and uc.status='ACTIVE' where us.userID=?", channelModel.ID, userID).Scan(&userDataModel.ID); err == nil {
 		bot.Send(userModel, "You have been registered in the "+channelModel.ChannelType+" *"+channelModel.ChannelName+"* belongs to the company *"+companyModel.CompanyName+"*, to start commination, go to "+channelModel.ChannelType+" via the blow button", newOptions)
 		return nil, nil, true
