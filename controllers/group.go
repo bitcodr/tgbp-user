@@ -91,9 +91,7 @@ func (service *BotService) RegisterGroup(app *config.App, bot *tb.Bot, m *tb.Mes
 			}
 			sendOptionModel := new(tb.SendOptions)
 			sendOptionModel.ParseMode = tb.ModeHTML
-							_, err = bot.Send(m.Chat, config.LangConfig.GetString("MESSAGES.GROUP_UNIQUE_ID_MESSAGE")+
-
-				` <code> `+uniqueID+` </code>`, sendOptionModel)
+							_, err = bot.Send(m.Chat, config.LangConfig.GetString("MESSAGES.GROUP_UNIQUE_ID_MESSAGE")+"\n<code>"+uniqueID+"</code>", sendOptionModel)
 			if err != nil {
 				log.Println(err)
 				return true

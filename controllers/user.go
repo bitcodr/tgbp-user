@@ -358,11 +358,7 @@ func (service *BotService) CheckUserRegisteredOrNot(db *sql.DB, app *config.App,
 				replyModel.ReplyKeyboardRemove = true
 				options.ReplyMarkup = replyModel
 				options.ParseMode = tb.ModeMarkdown
-				bot.Send(m.Sender, "You should first verify your account, Please enter your email I'd to register for "+
-
-					channel.Company.CompanyName+
-
-					channel.ChannelType+channel.ChannelName, options)
+				bot.Send(m.Sender, "You should first verify your account\nPlease enter your email I'd to register for\nCompany "+channel.Company.CompanyName+"\n"+channel.ChannelType+" "+channel.ChannelName, options)
 				return true
 			}
 		}
