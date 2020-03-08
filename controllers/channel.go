@@ -100,7 +100,7 @@ func (service *BotService) RegisterChannel(app *config.App, bot *tb.Bot, m *tb.M
 				sendOptionModel := new(tb.SendOptions)
 				sendOptionModel.ParseMode = tb.ModeHTML
 				_, err = bot.Send(m.Chat, config.LangConfig.GetString("MESSAGES.CHANNEL_UNIQUE_ID_MESSAGE")+
-` <code> `+uniqueID+` </code>`, sendOptionModel)
+					` <code> `+uniqueID+` </code>`, sendOptionModel)
 				if err != nil {
 					log.Println(err)
 					return true
@@ -181,21 +181,22 @@ func (service *BotService) SendReply(app *config.App, bot *tb.Bot, m *tb.Message
 				return true
 			}
 		}
-		file, err := bot.FileByID(messageModel.Message)
-		if err != nil {
-			log.Println(err)
-			return true
-		}
-		photoModel := new(tb.Photo)
+
 		switch messageModel.MessageType {
 		case "PHOTO":
+			photoModel := new(tb.Photo)
+			file, err := bot.FileByID(messageModel.Message)
+			if err != nil {
+				log.Println(err)
+				return true
+			}
 			photoModel.File = file
 			photoModel.Caption = config.LangConfig.GetString("MESSAGES.PLEASE_REPLY_MEDIA") + "on " + channelModel.ChannelName
-		}
-		_, err = bot.Send(m.Sender, photoModel)
-		if err != nil {
-			log.Println(err)
-			return true
+			_, err = bot.Send(m.Sender, photoModel)
+			if err != nil {
+				log.Println(err)
+				return true
+			}
 		}
 		return true
 	}
@@ -724,7 +725,7 @@ func (service *BotService) JoinToOtherCompanyChannels(db *sql.DB, app *config.Ap
 		}
 		inlineButton := tb.InlineButton{
 			Text:   channelModel.ChannelType + " " + channelModel.ChannelName,
-			Unique: config.LangConfig.GetString("COMMANDS.JOIN_TO_GROUP")+channelModel.UniqueID,
+			Unique: config.LangConfig.GetString("COMMANDS.JOIN_TO_GROUP") + channelModel.UniqueID,
 		}
 		if index%2 == 0 {
 			inlineButtonsEven = append(inlineButtonsEven, inlineButton)
