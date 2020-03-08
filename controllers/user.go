@@ -63,9 +63,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 	}
 	service.JoinFromGroup(db, app, bot, m, channelModel.ChannelID)
 	SaveUserLastState(db, app, bot, uniqueID, userID, config.LangConfig.GetString("STATE.REGISTER_USER_WITH_EMAIL"))
-	bot.Send(userModel, `Please enter your email I'd to register for
-`+channelModel.ChannelType+` *`+channelModel.ChannelName+`*
-company *`+companyModel.CompanyName+`*`, options)
+	bot.Send(userModel, "Please enter your email I'd to register for\n"+channelModel.ChannelType+" *"+channelModel.ChannelName+"\n*company *"+companyModel.CompanyName+"*", options)
 	return true
 }
 
