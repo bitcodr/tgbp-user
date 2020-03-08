@@ -181,7 +181,6 @@ func (service *BotService) SendReply(app *config.App, bot *tb.Bot, m *tb.Message
 				return true
 			}
 		}
-
 		switch messageModel.MessageType {
 		case "PHOTO":
 			photoModel := new(tb.Photo)

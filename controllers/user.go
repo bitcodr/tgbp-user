@@ -17,7 +17,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-//TODO add gmail.com yahoo to ban email address
+//TODO add gmail.com yahoo hotmail to ban email address
 
 func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bot *tb.Bot, m *tb.Message, request *Event, lastState *models.UserLastState, text string, userID int) bool {
 	userModel := new(tb.User)
@@ -42,7 +42,7 @@ func (service *BotService) RegisterUserWithemail(db *sql.DB, app *config.App, bo
 			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.PLEASE_ENTER_VALID_EMAIL"), options)
 			return true
 		}
-		emails := []string{"hotmail.com", "outlook.com", "zoho.com", "icloud.com", "mail.com", "aol.com", "yandex.com"}
+		emails := []string{"outlook.com", "zoho.com", "icloud.com", "mail.com", "aol.com", "yandex.com"}
 		emailSuffix := strings.Split(text, "@")
 		if helpers.SortAndSearchInStrings(emails, emailSuffix[1]) {
 			bot.Send(userModel, config.LangConfig.GetString("MESSAGES.NOT_ALLOWED_PUBLIC_EMAIL"), options)
